@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Large regenerated data: the master workbook lives on Google Drive, never in git
+data/Research Data.xlsx
+data/Research_Data.xlsx
+data/pipeline_status.json
+Research Data.xlsx
+pipeline_status.json
+
+# OS
+.DS_Store
