@@ -10,9 +10,9 @@ Statuses: DONE, PARTIAL (with what remains), PENDING (checkpoint letter).
 | 1 Overview, four target pathogens | Start / scope | modules/agent_engine.py CORE4 | DONE |
 | 2 Evidence base assembly | Assemble evidence base | data/curated_seed.xlsx + scripts/refresh_data.py | DONE |
 | 3 Data regime typology (Types 1, 2, 3) | Classify by data regime | Data Dictionary sheet + modules/load_data.load_data_dictionary | DONE |
-| 4 Agents O, H, L; recursion; Agent M merge | Route to acquisition agents; Agent M | Agent O and L: refresh_data.py + agent_m_data.py; recursion: launcher staleness loop. Agent H reconciliation (live level, historical dynamics): PARTIAL, live values sit beside baselines | PARTIAL (checkpoint C) |
+| 4 Agents O, H, L; recursion; Agent M merge | Route to acquisition agents; Agent M | Agent O and L: refresh_data.py + agent_m_data.py; recursion: launcher staleness loop; RESP-NET full history feed (kvib-3txy) added at C3. Agent H reconciliation display | PARTIAL: reconciliation polish assigned to the review pass |
 | 5 Eight domain agents | Distribute to eight agents | modules/agent_engine.AGENTS + modules/agent_view.py, all eight pages on the shared renderer | DONE |
-| 5 AI enrichment (additive only) | AI evidence enrichment | modules/genai.py + modules/evidence.py exist; wiring | PENDING (C) |
+| 5 AI enrichment (additive only) | AI evidence enrichment | Enrichment expander on every agent page (Serper search plus Gemini summary), strictly additive, never enters the matrix | DONE |
 | 6 Surveillance pipeline, six feeds, weekly | Live sources | scripts/refresh_data.py + GitHub or launch refresh | DONE |
 | 7.1 Fuzzy chain, GMIR, five term scale | Weight Manager | modules/weight_manager.py gmir, IMPORTANCE_SCALE | DONE |
 | 7.2 Criterion level and agent level modes; multi expert mean | Weight Manager modes | criterion level per agent; agent level W_g elicitation on the SSDM Integration page (four modes) | DONE |

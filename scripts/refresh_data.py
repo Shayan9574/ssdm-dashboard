@@ -68,6 +68,14 @@ CDC_ENDPOINTS = {
         "extra_filter": "state in ('United States', 'Michigan', 'US', 'National')",
         "order_by": "date asc"
     },
+    "RESP-NET Rates and Clinical Dat": {
+        "id": "kvib-3txy",
+        "name": "RESP-NET Hospitalization Rates",
+        "network": "CDC RESP-NET",
+        "metrics": "Age stratified weekly hospitalization rates per 100k",
+        "extra_filter": "state = 'Overall' and sex = 'All' and race = 'All'",
+        "order_by": "date asc"
+    },
     "NNDSS Weekly Data": {
         "id": "x9gk-5huc",
         "name": "Weekly Notifiable Diseases (NNDSS)",
@@ -120,9 +128,11 @@ def fetch_full_history_paginated(
 
     return df
 
+# RESP-NET moved from the curated list to the live feeds (kvib-3txy, full
+# 2018 onward history); the seed's one year extract remains only as fallback.
 CURATED_SHEETS = [
     "Baseline Data", "Historical Outbreaks & Surges", "Data Dictionary",
-    "Citations", "Derivations", "Scenario Registry", "RESP-NET Rates and Clinical Dat",
+    "Citations", "Derivations", "Scenario Registry",
     "Weekly Hospital Respiratory Adm", "Provisional COVID-19 Death Coun",
     "Provisional COVID-19 death  (2)",
 ]
