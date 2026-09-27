@@ -15,7 +15,7 @@ Statuses: DONE, PARTIAL (with what remains), PENDING (checkpoint letter).
 | 5 AI enrichment (additive only) | AI evidence enrichment | modules/genai.py + modules/evidence.py exist; wiring | PENDING (C) |
 | 6 Surveillance pipeline, six feeds, weekly | Live sources | scripts/refresh_data.py + GitHub or launch refresh | DONE |
 | 7.1 Fuzzy chain, GMIR, five term scale | Weight Manager | modules/weight_manager.py gmir, IMPORTANCE_SCALE | DONE |
-| 7.2 Criterion level and agent level modes; multi expert mean | Weight Manager modes | criterion level DONE per agent; agent level store present, elicitation page | PENDING (D, feeds Section 16) |
+| 7.2 Criterion level and agent level modes; multi expert mean | Weight Manager modes | criterion level per agent; agent level W_g elicitation on the SSDM Integration page (four modes) | DONE |
 | 7.3 Four input modes with provenance | Input modes | weight_manager.render_weight_elicitation (default, direct, upload with template, questionnaire with visible fuzzy chain) | DONE |
 | 8 Readiness gate, refine and re run | Readiness diamond | agent_view readiness note + co-equal tier prompt; full gate across registry and scenarios | PARTIAL (C) |
 | 9.1 to 9.8 Updated MOSDM | Run updated MOSDM | modules/mosdm_core.py, verified on Agent 1; guard_min_shared = 1 per decision | DONE |
@@ -23,14 +23,14 @@ Statuses: DONE, PARTIAL (with what remains), PENDING (checkpoint letter).
 | 9.3 Expert limits override medians | Acceptable limits | weight_manager.render_limits_editor + engine expert_limits | DONE |
 | 10 Scenario construction from 2016 to 2026 history | Construct scenario set | Scenario Registry curated sheet: nine weighted scenarios (S1 to S9, S4 redefined to sustained Rt above one, S6 provisional) plus the ST1 economic stress test; four converging sources applied; per marker n_s and Y_s recorded | DONE (S6 marker window extension via full RESP-NET pull remains, checkpoint C2) |
 | 11 Probability engine pi_s = f^alpha s^beta h^gamma; fuzzy intensity; lambda = 0.7; baseline outside | Estimate probability | modules/scenario_engine.probability_table (f from registry, s and h expert plus Gemini blend, exponents configurable, normalization over weighted scenarios only) + Scenarios & Probability page audit table | DONE |
-| 12 Scenario wise re runs; AI tier interpretation | Re-run MOSDM per scenario | scenario_engine.run_scenario and tier_matrix (emphasis default profiles, elicited overrides); scenario selector on every agent page; AI tier interpretation | PARTIAL: interpretation module lands with the synthesis at checkpoint D |
+| 12 Scenario wise re runs; AI tier interpretation | Re-run MOSDM per scenario | scenario_engine.run_scenario and tier_matrix; scenario selector on every agent page; ssdm_core.interpret_tiers button on the scenario page | DONE |
 | 13 Stability classification, displacement, trigger, exposure | Stability diamond | scenario_engine.stability_table: robust versus scenario sensitive, displacement with direction, triggers, exposure sum p_s, instability index sum p_s abs delta; stress test excluded | DONE |
-| 14 Indicators R, Phi, sigma, SI | Probability weighted SSDM | | PENDING (D) |
-| 15 Quadrant classes | Classify by priority and stability | | PENDING (D) |
-| 16 Second order matrix, agent weights W_g | Final integration | Agent 5 direction reconciliation noted in agent_engine docstring | PENDING (D) |
-| 17 Cross agent SSDM | Apply SSDM across agents | | PENDING (D) |
-| 18 Final synthesis (AI, never alters results) | Generate final synthesis | | PENDING (D) |
-| 19 Outputs page | Outputs | | PENDING (D/E) |
+| 14 Indicators R, Phi, sigma, SI | Probability weighted SSDM | ssdm_core.indicators (weighted scenarios only, baseline outside) | DONE |
+| 15 Quadrant classes | Classify by priority and stability | ssdm_core.quadrants, theta configurable, scatter on the Integration page | DONE |
+| 16 Second order matrix, agent weights W_g | Final integration | ssdm_core.second_order (Agent 5 inverted at integration), W_g via Weight Manager agent level scope | DONE |
+| 17 Cross agent SSDM | Apply SSDM across agents | ssdm_core.cross_agent_run: second generation MOSDM on the expected rank matrix, parallel baseline reference run | DONE |
+| 18 Final synthesis (AI, never alters results) | Generate final synthesis | ssdm_core.synthesize on the Integration page, labeled, numbers sourced from the engine only | DONE |
+| 19 Outputs page | Outputs | Downloads section on the Integration page (final stratification, second order matrix, indicators as CSV); full outputs design at checkpoint E | PARTIAL (E) |
 | Standing rule: calculation audit beside every derived number | | Derivations sheet + load_derivations + agent_view expander | DONE |
 | Standing rule: engine provenance label on results | | agent_view ENGINE_BADGE | DONE |
 | Standing rule: co-equal tier asks the user in the dashboard | | agent_view warning prompt with elicitation path | DONE |

@@ -125,6 +125,14 @@ def render(jurisdiction: str = "National") -> None:
     st.dataframe(tm, width="stretch")
     st.markdown("**Stability classification (Section 13)**")
     st.dataframe(stab, width="stretch", hide_index=True)
+    if st.button("AI tier interpretation", disabled=not genai.gemini_available(),
+                 help="Three sentence reading of the matrix; results unchanged."):
+        from modules import ssdm_core as sc
+        try:
+            st.info(sc.interpret_tiers(AGENTS[agent_key]["title"],
+                                       tm.reset_index(), model))
+        except Exception as e:
+            st.error(f"Interpretation failed: {e}")
     st.caption("Robust priority: the tier holds across every weighted "
                "scenario. Scenario sensitive: displacement recorded with its "
                "magnitude, direction, triggering scenarios, exposure, and the "
