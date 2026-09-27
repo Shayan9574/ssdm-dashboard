@@ -1,5 +1,11 @@
 import json
+import os
 import requests
+
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
+
+def gemini_available() -> bool:
+    return bool(os.environ.get("GEMINI_API_KEY"))
 
 def _post_json(url, headers, payload, timeout=60):
     r = requests.post(url, headers=headers, json=payload, timeout=timeout)

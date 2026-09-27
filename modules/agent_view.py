@@ -47,6 +47,22 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
     profile, result, weights, wprov, limits, lprov = run_agent(
         agent_key, jurisdiction, selected)
 
+    from modules import scenario_engine as se
+    scen_opts = ["Baseline"] + se.scenario_ids(include_stress=True)
+    reg_names = se.get_registry().set_index("Scenario ID")["Name"].to_dict()
+    chosen = st.selectbox(
+        "Decision environment", scen_opts,
+        format_func=lambda s: "Baseline (elicited or default weights)"
+        if s == "Baseline" else f"{s}: {reg_names.get(s, s)}"
+        + (" [stress test, unweighted]" if s.startswith("ST") else ""),
+        key=f"{agent_key}_scen",
+        help="A scenario replaces the weight profile and re runs the full "
+             "stratification; the disease data never change.")
+    if chosen != "Baseline":
+        result, sprov = se.run_scenario(agent_key, chosen, jurisdiction)
+        st.caption(f"Scenario weight profile: {sprov}. Stability against the "
+                   "baseline is on the Scenarios & Probability page.")
+
     # 1) baseline matrix + calculation audit
     st.subheader("1) Baseline Evidence Matrix",
                  help="Crisp parsed values from the curated evidence base; ranges are stored as their arithmetic midpoints with the raw form retained.")

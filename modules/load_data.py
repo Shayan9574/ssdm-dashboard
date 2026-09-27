@@ -141,3 +141,14 @@ def load_derivations(target_diseases: list = None, file_path: str = None) -> pd.
         der = der[der["Target Disease"].astype(str).str.lower().apply(
             lambda d: any(t in d or d in t for t in tl))].reset_index(drop=True)
     return der
+
+
+@st.cache_data(ttl=3600)
+def load_scenario_registry(file_path: str = None) -> pd.DataFrame:
+    """Loads the Scenario Registry curated sheet (Section 10)."""
+    fp = Path(file_path) if file_path else get_data_filepath()
+    if not fp.exists():
+        raise FileNotFoundError(f"Master file not found at: {fp}")
+    reg = pd.read_excel(fp, sheet_name="Scenario Registry")
+    reg.columns = [str(c).strip() for c in reg.columns]
+    return reg

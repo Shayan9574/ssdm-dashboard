@@ -53,6 +53,7 @@ page = st.sidebar.radio(
         "Agent 6: Vulnerable Populations",
         "Agent 7: Outbreak Dynamics & Risk",
         "Agent 8: Social & Economic Impact",
+        "Scenarios & Probability",
         "About & Methodology"
     ],
     help="Navigate between the master surveillance overview, the 8 specialized domain agents, and technical methodology documentation."
@@ -172,6 +173,10 @@ elif page == "Agent 7: Outbreak Dynamics & Risk":
 elif page == "Agent 8: Social & Economic Impact":
     from modules.agents import agent8
     agent8.render(jurisdiction=jurisdiction)
+
+elif page == "Scenarios & Probability":
+    from modules import scenario_view
+    scenario_view.render(jurisdiction=jurisdiction)
 
 elif page == "About & Methodology":
     from modules import about
