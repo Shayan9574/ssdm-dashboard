@@ -122,7 +122,7 @@ def fetch_full_history_paginated(
 
 CURATED_SHEETS = [
     "Baseline Data", "Historical Outbreaks & Surges", "Data Dictionary",
-    "Citations", "Derivations", "RESP-NET Rates and Clinical Dat",
+    "Citations", "Derivations", "Scenario Registry", "RESP-NET Rates and Clinical Dat",
     "Weekly Hospital Respiratory Adm", "Provisional COVID-19 Death Coun",
     "Provisional COVID-19 death  (2)",
 ]
