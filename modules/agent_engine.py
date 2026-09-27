@@ -146,7 +146,7 @@ def median_limits_for(profile: pd.DataFrame, criteria: List[str]) -> Dict[str, f
 @st.cache_data(ttl=900, show_spinner=False)
 def _cached_run(agent_key: str, jurisdiction: str,
                 weights_items: tuple, limits_items: tuple,
-                selected: tuple) -> MOSDMResult:
+                selected: tuple, attainment_mode: str) -> MOSDMResult:
     cfg = AGENTS[agent_key]
     wide = get_active_decision_matrix(jurisdiction=jurisdiction)
     wide = wide[wide["Disease Type"].isin(list(selected))]
@@ -156,6 +156,7 @@ def _cached_run(agent_key: str, jurisdiction: str,
         profile, cfg["criteria"], cfg["directions"],
         weights=dict(weights_items) or None,
         expert_limits=dict(limits_items) or None,
+        attainment_mode=attainment_mode,
         alternative_col="Disease Type",
     )
 
@@ -172,8 +173,9 @@ def run_agent(agent_key: str, jurisdiction: str,
 
     weights, wprov = wm.get_weights(agent_key, cfg["criteria"])
     limits, lprov = wm.get_expert_limits(agent_key)
+    mode = st.session_state.get("attainment_mode", "graded_calibrated")
     result = _cached_run(agent_key, jurisdiction,
                          tuple(sorted(weights.items())),
                          tuple(sorted(limits.items())),
-                         tuple(selected))
+                         tuple(selected), mode)
     return profile, result, weights, wprov, limits, lprov

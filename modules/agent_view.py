@@ -21,7 +21,10 @@ from modules import weight_manager as wm
 from modules.agent_engine import AGENTS, CORE4, run_agent, median_limits_for
 from modules.load_data import load_citations, load_derivations
 
-ENGINE_BADGE = "Engine: updated MOSDM (weighted attainment, tolerance tiers, dominance guard)"
+ENGINE_BADGE = "Engine: second generation MOSDM (graded attainment, tolerance tiers, dominance guard)"
+MODES = {"graded_calibrated": "Graded, discrimination calibrated anchors (default)",
+         "graded_fixed": "Graded, fixed anchor theta = 0.5",
+         "binary": "Binary attainment (first generation, ablation)"}
 
 
 def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
@@ -95,6 +98,11 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
                "Change either above and the stratification below recomputes.")
 
     # 4) updated MOSDM stratification
+    st.selectbox("Attainment mode", list(MODES), format_func=MODES.get,
+                 key="attainment_mode",
+                 help="Graded attainment anchors credit at the acceptable "
+                      "limit and lets magnitude matter; binary is the first "
+                      "generation step rule, kept for comparison.")
     st.subheader("4) Updated MOSDM Stratification",
                  help="Weighted attainment k^w with tolerance based tiers, "
                       "dominance guard, target state by smallest weighted "
@@ -125,7 +133,10 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
                 st.dataframe(lim, width="stretch")
                 st.write("Weighted attainment k^w:",
                          {a: round(v, 3) for a, v in rec.k_weighted.items()},
-                         f" tolerance δ = {rec.delta:.3f}")
+                         f" tolerance δ = {rec.delta:.3f} | mode: {rec.attainment_mode}")
+                if rec.thetas:
+                    st.write("Calibrated anchors θ_j:",
+                             {c: round(t, 2) for c, t in rec.thetas.items()})
                 if rec.demotions:
                     st.write("Dominance guard demotions:", rec.demotions)
                 if rec.noninformative:

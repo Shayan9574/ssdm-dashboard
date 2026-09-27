@@ -57,6 +57,8 @@ class IterationRecord:
     scores: Dict[str, float]              # S_i within the tier
     noninformative: List[str]
     missing: Dict[str, List[str]]         # alt -> criteria excluded
+    thetas: Dict[str, float] = field(default_factory=dict)   # anchor per criterion
+    attainment_mode: str = "binary"
 
 
 @dataclass
@@ -157,6 +159,47 @@ def _strictly_dominated(a: str, b: str, norm: pd.DataFrame,
     return all(norm.at[a, c] < norm.at[b, c] for c in shared)
 
 
+
+
+def _oriented_point(value: float, cmin: float, cmax: float, direction: str) -> float:
+    if pd.isna(value) or pd.isna(cmin) or pd.isna(cmax) or np.isclose(cmax, cmin):
+        return np.nan
+    x = (value - cmin) / (cmax - cmin)
+    x = min(max(x, 0.0), 1.0)
+    return 1.0 - x if direction == NEGATIVE else x
+
+
+def _graded_degree(xbar: float, lbar: float, theta: float) -> float:
+    """Two regime value function anchored at the limit position lbar:
+    0 at pool worst, theta exactly at the limit, 1 at pool best."""
+    if pd.isna(xbar) or pd.isna(lbar):
+        return np.nan
+    if np.isclose(lbar, 0.0):
+        return theta + (1.0 - theta) * xbar
+    if np.isclose(lbar, 1.0):
+        return theta * xbar
+    if xbar <= lbar:
+        return theta * (xbar / lbar)
+    return theta + (1.0 - theta) * (xbar - lbar) / (1.0 - lbar)
+
+
+def _calibrate_theta(xbars: "pd.Series", lbar: float,
+                     bounds: Tuple[float, float]) -> float:
+    """Discrimination calibrated anchor: the theta in bounds maximizing the
+    variance of graded attainment over the pool; ties resolve toward 0.5."""
+    vals = xbars.dropna().values
+    if len(vals) < 2 or pd.isna(lbar):
+        return 0.5
+    grid = np.round(np.arange(bounds[0], bounds[1] + 1e-9, 0.01), 2)
+    best_t, best_v = 0.5, -1.0
+    for t in grid:
+        g = np.array([_graded_degree(x, lbar, t) for x in vals])
+        v = float(np.var(g))
+        if v > best_v + 1e-12 or (abs(v - best_v) <= 1e-12 and
+                                  abs(t - 0.5) < abs(best_t - 0.5)):
+            best_v, best_t = v, t
+    return float(best_t)
+
 # ----------------------------------------------------------------------
 # main entry point
 # ----------------------------------------------------------------------
@@ -167,6 +210,10 @@ def run_mosdm(
     directions: Dict[str, str],
     weights: Optional[Dict[str, float]] = None,
     expert_limits: Optional[Dict[str, float]] = None,
+    historical_limits: Optional[Dict[str, float]] = None,
+    attainment_mode: str = "graded_calibrated",
+    theta_fixed: float = 0.5,
+    theta_bounds: Tuple[float, float] = (0.3, 0.7),
     dominance_guard: bool = True,
     guard_min_shared: int = 1,
     alternative_col: Optional[str] = None,
@@ -187,6 +234,15 @@ def run_mosdm(
     guard_min_shared: minimum number of shared criteria for a demotion
                      (default 1; raise it later if heavy missingness makes
                      single criterion dominance judgments too aggressive).
+    historical_limits: criterion -> long run quantile threshold from the ten
+                     year system history; second in the limits hierarchy
+                     (expert > historical > pool median). Populated by the
+                     scenario stage ETL; pool median applies when absent.
+    attainment_mode: "graded_calibrated" (default; two regime value function
+                     with the anchor theta_j chosen in theta_bounds to
+                     maximize discrimination), "graded_fixed" (anchor =
+                     theta_fixed), or "binary" (step function; the first
+                     generation rule, kept for ablation).
     """
     X = matrix.copy()
     if alternative_col is not None:
@@ -213,20 +269,46 @@ def run_mosdm(
 
         # -- 9.3 acceptable limits ------------------------------------
         med = _median_limits(X, pool, criteria)
-        limits = {c: float(expert_limits[c]) if c in expert_limits else med[c]
-                  for c in criteria}
-        limit_source = {c: ("expert" if c in expert_limits else "median")
-                        for c in criteria}
+        historical_limits = historical_limits or {}
+        limits, limit_source = {}, {}
+        for c in criteria:
+            if c in expert_limits:
+                limits[c], limit_source[c] = float(expert_limits[c]), "expert"
+            elif c in historical_limits and not pd.isna(historical_limits[c]):
+                limits[c], limit_source[c] = float(historical_limits[c]), "historical"
+            else:
+                limits[c], limit_source[c] = med[c], "median"
 
         # -- 9.4 weighted attainment ----------------------------------
         attain: Dict[str, Dict[str, float]] = {}
         k_w: Dict[str, float] = {}
         missing: Dict[str, List[str]] = {}
+        thetas: Dict[str, float] = {}
+        lbars: Dict[str, float] = {}
+        stats = {c: (X.loc[pool, c].min(skipna=True),
+                     X.loc[pool, c].max(skipna=True)) for c in criteria}
+        for c in criteria:
+            cmin, cmax = stats[c]
+            lbars[c] = _oriented_point(limits[c], cmin, cmax,
+                                       directions.get(c, POSITIVE))
+            if attainment_mode == "graded_calibrated":
+                xb = X.loc[pool, c].apply(
+                    lambda v: _oriented_point(v, cmin, cmax,
+                                              directions.get(c, POSITIVE)))
+                thetas[c] = _calibrate_theta(xb, lbars[c], theta_bounds)
+            elif attainment_mode == "graded_fixed":
+                thetas[c] = float(theta_fixed)
         for a in pool:
             row = {}
             for c in criteria:
-                row[c] = _attains(X.at[a, c], limits[c],
-                                  directions.get(c, POSITIVE))
+                if attainment_mode == "binary" or pd.isna(lbars[c]):
+                    row[c] = _attains(X.at[a, c], limits[c],
+                                      directions.get(c, POSITIVE))
+                else:
+                    cmin, cmax = stats[c]
+                    xbar = _oriented_point(X.at[a, c], cmin, cmax,
+                                           directions.get(c, POSITIVE))
+                    row[c] = _graded_degree(xbar, lbars[c], thetas[c])
             attain[a] = row
             avail = [c for c in criteria if not pd.isna(row[c])]
             missing[a] = [c for c in criteria if pd.isna(row[c])]
@@ -284,6 +366,7 @@ def run_mosdm(
             delta=delta, candidate_tier=candidate, demotions=demotions,
             tier=ordered, target=target, scores=t_scores,
             noninformative=flat, missing=missing,
+            thetas=dict(thetas), attainment_mode=attainment_mode,
         ))
 
         pool = [a for a in pool if a not in tier_members]
@@ -297,10 +380,14 @@ def run_mosdm(
     explanations = {}
     for a in alts:
         rec = iterations[tiers[a] - 1]
-        met = [c for c in criteria if rec.attainment[a].get(c) == 1.0]
+        met = [c for c in criteria
+               if not pd.isna(rec.attainment[a].get(c, np.nan))
+               and rec.attainment[a][c] >= (rec.thetas.get(c, 1.0)
+                                            if rec.attainment_mode != "binary" else 1.0)]
         expl = (f"Tier {tiers[a]}: weighted attainment "
-                f"{rec.k_weighted[a]:.3f} (tolerance {rec.delta:.3f}); "
-                f"meets {len(met)} of {len(criteria)} acceptable limits")
+                f"{rec.k_weighted[a]:.3f} (tolerance {rec.delta:.3f}, "
+                f"mode {rec.attainment_mode}); reaches {len(met)} of "
+                f"{len(criteria)} acceptable limits")
         if a == rec.target:
             expl += "; target state of its tier (closest to the ideal point)"
         demoted_by = [b for (d, b) in rec.demotions if d == a]

@@ -19,6 +19,7 @@ Statuses: DONE, PARTIAL (with what remains), PENDING (checkpoint letter).
 | 7.3 Four input modes with provenance | Input modes | weight_manager.render_weight_elicitation (default, direct, upload with template, questionnaire with visible fuzzy chain) | DONE |
 | 8 Readiness gate, refine and re run | Readiness diamond | agent_view readiness note + co-equal tier prompt; full gate across registry and scenarios | PARTIAL (C) |
 | 9.1 to 9.8 Updated MOSDM | Run updated MOSDM | modules/mosdm_core.py, verified on Agent 1; guard_min_shared = 1 per decision | DONE |
+| 9.4 SECOND GENERATION: graded attainment, two regime value function, discrimination calibrated anchors theta_j in [0.3, 0.7]; limits hierarchy expert > historical > pool median | Run updated MOSDM | mosdm_core attainment_mode (default graded_calibrated); historical_limits plumbed, populated at checkpoint C | DONE (engine); REMINDER: rewrite methods document Sections 9.3 to 9.5 to the second generation formulation, approved in chat, before submission |
 | 9.3 Expert limits override medians | Acceptable limits | weight_manager.render_limits_editor + engine expert_limits | DONE |
 | 10 Scenario construction from 2016 to 2026 history | Construct scenario set | scenario registry builder | PENDING (C) |
 | 11 Probability engine pi_s = f^alpha s^beta h^gamma; fuzzy intensity; lambda = 0.7; baseline outside | Estimate probability | INTENSITY_SCALE ready in weight_manager; engine and Gemini elicitation | PENDING (C) |
