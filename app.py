@@ -36,6 +36,8 @@ jurisdiction = st.sidebar.selectbox(
 )
 jur_label = "US National" if jurisdiction == "National" else "Michigan (MI)"
 st.sidebar.caption(f"Active surveillance feeds set to **{jur_label}** (Lag: t-1 wk).")
+st.sidebar.caption("Engine: updated MOSDM on every agent page; weights and "
+                   "expert limits are elicited inside each agent (Section 3).")
 
 st.sidebar.divider()
 st.sidebar.title("Navigation")
