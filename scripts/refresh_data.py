@@ -120,12 +120,36 @@ def fetch_full_history_paginated(
 
     return df
 
+CURATED_SHEETS = [
+    "Baseline Data", "Historical Outbreaks & Surges", "Data Dictionary",
+    "Citations", "Derivations", "RESP-NET Rates and Clinical Dat",
+    "Weekly Hospital Respiratory Adm", "Provisional COVID-19 Death Coun",
+    "Provisional COVID-19 death  (2)",
+]
+
+def sync_curated_sheets():
+    """Copies the curated sheets from the committed seed into the master
+    workbook so baseline edits in the repository propagate to Drive."""
+    if not SEED_FILE.exists() or not DATA_FILE.exists():
+        return
+    import warnings
+    warnings.filterwarnings("ignore")
+    with pd.ExcelWriter(DATA_FILE, engine="openpyxl", mode="a",
+                        if_sheet_exists="replace") as writer:
+        seed = pd.ExcelFile(SEED_FILE)
+        for sheet in CURATED_SHEETS:
+            if sheet in seed.sheet_names:
+                df = pd.read_excel(SEED_FILE, sheet_name=sheet, header=None)
+                df.to_excel(writer, sheet_name=sheet, index=False, header=False)
+                print(f" Synced curated sheet '{sheet}' from seed")
+
 def update_excel_sheets():
     """Refreshes all surveillance tabs in Research Data.xlsx and writes pipeline_status.json."""
     if not DATA_FILE.exists():
         raise FileNotFoundError(f"Could not locate master file at: {DATA_FILE}")
 
     print(f"Updating: {DATA_FILE}")
+    sync_curated_sheets()
     feed_reports = {}
     total_records = 0
     failures = 0

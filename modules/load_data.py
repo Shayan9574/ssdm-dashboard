@@ -123,3 +123,21 @@ def load_citations(target_diseases: list = None, file_path: str = None) -> pd.Da
 
     filtered = cits[cits["Target Disease"].apply(_matches_disease)].reset_index(drop=True)
     return filtered
+
+@st.cache_data(ttl=3600)
+def load_derivations(target_diseases: list = None, file_path: str = None) -> pd.DataFrame:
+    """Loads the Derivations sheet: the detailed calculation behind every
+    derived baseline figure, for the dashboard's calculation audit view."""
+    fp = Path(file_path) if file_path else get_data_filepath()
+    if not fp.exists():
+        raise FileNotFoundError(f"Master file not found at: {fp}")
+    try:
+        der = pd.read_excel(fp, sheet_name="Derivations")
+    except ValueError:
+        return pd.DataFrame()
+    der.columns = [str(c).strip() for c in der.columns]
+    if target_diseases:
+        tl = [str(t).lower() for t in target_diseases]
+        der = der[der["Target Disease"].astype(str).str.lower().apply(
+            lambda d: any(t in d or d in t for t in tl))].reset_index(drop=True)
+    return der
