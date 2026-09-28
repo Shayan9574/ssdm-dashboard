@@ -44,7 +44,11 @@ from modules.load_data import get_data_filepath
 from modules.utils_numeric import parse_numeric
 from modules import genai
 
-LEDGER_SHEET = "Evidence Ledger"
+LEDGER_SHEET = "Evidence Ledger"          # legacy name, no longer written
+def _ledger_path():
+    """The ledger lives in its own small file beside the master workbook,
+    so the live app never rewrites the large master (Drive safe, atomic)."""
+    return get_data_filepath().parent / "evidence_ledger.csv"
 TOLERANCE = 0.25
 TRUSTED_PATTERNS = [
     r"\.gov(/|$)", r"who\.int", r"ncbi\.nlm\.nih\.gov", r"pubmed",
@@ -240,17 +244,19 @@ def run_gate(rows: List[dict], profile: pd.DataFrame, criteria: List[str],
 
 
 def append_ledger(report: pd.DataFrame) -> int:
-    """Persists the gate report to the Evidence Ledger sheet on the master
-    workbook (Drive in Colab); returns rows written."""
-    fp = get_data_filepath()
+    """Persists the gate report to evidence_ledger.csv beside the master
+    workbook (on Drive in Colab): read, concatenate, write to a temporary
+    file, atomically replace. The master workbook is never touched."""
+    import os as _os
+    lp = _ledger_path()
     try:
-        existing = pd.read_excel(fp, sheet_name=LEDGER_SHEET)
+        existing = pd.read_csv(lp)
     except Exception:
         existing = pd.DataFrame()
     combined = pd.concat([existing, report], ignore_index=True)
-    with pd.ExcelWriter(fp, engine="openpyxl", mode="a",
-                        if_sheet_exists="replace") as w:
-        combined.to_excel(w, sheet_name=LEDGER_SHEET, index=False)
+    tmp = lp.with_suffix(".tmp.csv")
+    combined.to_csv(tmp, index=False)
+    _os.replace(tmp, lp)
     load_ledger.clear()
     return len(report)
 
@@ -258,8 +264,7 @@ def append_ledger(report: pd.DataFrame) -> int:
 @st.cache_data(ttl=900)
 def load_ledger() -> pd.DataFrame:
     try:
-        led = pd.read_excel(get_data_filepath(), sheet_name=LEDGER_SHEET)
-        return led
+        return pd.read_csv(_ledger_path())
     except Exception:
         return pd.DataFrame()
 
