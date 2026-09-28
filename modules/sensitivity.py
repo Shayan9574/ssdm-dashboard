@@ -32,7 +32,7 @@ def _final_ranks(jurisdiction, lam, a, b, g, mode) -> Dict[str, int]:
     return {d: i + 1 for i, d in enumerate(res.order)}
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def parameter_sweep(param: str, grid: Tuple[float, ...], jurisdiction: str,
                     lam: float, a: float, b: float, g: float,
                     mode: str) -> pd.DataFrame:
@@ -47,7 +47,7 @@ def parameter_sweep(param: str, grid: Tuple[float, ...], jurisdiction: str,
     return pd.DataFrame(rows)
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def weight_monte_carlo(jurisdiction: str, lam: float, a: float, b: float,
                        g: float, mode: str, n_draws: int = 500,
                        concentration: float = 60.0, seed: int = 7
@@ -82,7 +82,39 @@ def weight_monte_carlo(jurisdiction: str, lam: float, a: float, b: float,
     return tiers, pd.DataFrame(rank_rows)
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
+def prob_sweep(param: str, grid: Tuple[float, ...], lam: float, a: float,
+               b: float, g: float) -> pd.DataFrame:
+    """p_s for every weighted scenario along the parameter grid."""
+    rows = []
+    for v in grid:
+        args = {"lam": lam, "a": a, "b": b, "g": g}
+        args[param] = v
+        pm = se.probability_map(args["lam"], args["a"], args["b"], args["g"])
+        for sid, p in pm.items():
+            rows.append({"value": v, "Scenario": sid, "p_s": p})
+    return pd.DataFrame(rows)
+
+
+@st.cache_data(ttl=21600, show_spinner=False)
+def r_sweep(param: str, grid: Tuple[float, ...], agent_key: str,
+            jurisdiction: str, lam: float, a: float, b: float, g: float,
+            mode: str) -> pd.DataFrame:
+    """Expected rank R per disease along the grid, for one agent: the
+    continuous quantity underneath the discrete final ranks."""
+    rows = []
+    for v in grid:
+        args = {"lam": lam, "a": a, "b": b, "g": g}
+        args[param] = v
+        ind = sc.indicators(agent_key, jurisdiction, args["lam"], args["a"],
+                            args["b"], args["g"], mode)
+        for _, r in ind.iterrows():
+            rows.append({"value": v, "Disease": r["Disease"],
+                         "R": r["R (expected rank)"]})
+    return pd.DataFrame(rows)
+
+
+@st.cache_data(ttl=21600, show_spinner=False)
 def theta_sweep(agent_key: str, jurisdiction: str, lam: float, a: float,
                 b: float, g: float, mode: str,
                 grid: Tuple[float, ...] = tuple(np.round(
@@ -97,7 +129,7 @@ def theta_sweep(agent_key: str, jurisdiction: str, lam: float, a: float,
     return pd.DataFrame(rows)
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def mode_comparison(jurisdiction: str, lam: float, a: float, b: float,
                     g: float) -> pd.DataFrame:
     out = {}

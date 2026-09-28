@@ -139,21 +139,52 @@ def sensitivity_page(jurisdiction="National"):
                                       "g": "gamma (impact exponent)"}.get)
     grid = tuple(np.round(np.arange(0.0, 2.01, 0.25), 2)) if param != "lam" \
         else tuple(np.round(np.arange(0.0, 1.01, 0.1), 2))
-    with st.spinner("Sweeping"):
+    ak_s = st.selectbox("Agent for the expected rank view", list(AGENTS),
+                        format_func=lambda k: AGENTS[k]["title"],
+                        key="sens_agent")
+    with st.spinner("Sweeping the full chain"):
         sw = sens.parameter_sweep(param, grid, jurisdiction, lam, a, b, g, mode)
+        ps = sens.prob_sweep(param, grid, lam, a, b, g)
+        rs = sens.r_sweep(param, grid, ak_s, jurisdiction, lam, a, b, g, mode)
+    c1, c2 = st.columns(2)
+    with c1:
+        fig = go.Figure()
+        for sid in sorted(ps["Scenario"].unique()):
+            dd = ps[ps["Scenario"] == sid]
+            fig.add_trace(go.Scatter(x=dd["value"], y=dd["p_s"],
+                                     mode="lines", name=sid))
+        fig.update_yaxes(title="Scenario probability p_s")
+        fig.update_xaxes(title=param)
+        fig.update_layout(title="What the parameter moves first: p_s")
+        st.plotly_chart(ui._base_layout(fig), use_container_width=True)
+    with c2:
+        fig = go.Figure()
+        for d in CORE4:
+            dd = rs[rs["Disease"] == d]
+            fig.add_trace(go.Scatter(x=dd["value"], y=dd["R"],
+                                     mode="lines+markers",
+                                     name=ui.SHORT.get(d, d)))
+        fig.update_yaxes(title="Expected rank R", autorange="reversed")
+        fig.update_xaxes(title=param)
+        fig.update_layout(title="How expected priorities respond: R per disease")
+        st.plotly_chart(ui._base_layout(fig), use_container_width=True)
     fig = go.Figure()
     for d in CORE4:
         dd = sw[sw["Disease"] == d]
         fig.add_trace(go.Scatter(x=dd["value"], y=dd["Final rank"],
-                                 mode="lines+markers",
-                                 name=ui.SHORT.get(d, d)))
-    fig.update_yaxes(title="Final integrated rank", autorange="reversed",
-                     dtick=1)
+                                 mode="lines+markers", name=ui.SHORT.get(d, d)))
+    fig.update_yaxes(title="Final integrated rank", autorange="reversed", dtick=1)
     fig.update_xaxes(title=param)
+    fig.update_layout(title="Does the conclusion change: final integrated ranks")
     st.plotly_chart(ui._base_layout(fig), use_container_width=True)
-    st.caption("Flat lines mean the conclusion does not depend on the "
-               "parameter; crossings mark the values where the "
-               "prioritization would change.")
+    if sw.groupby("Disease")["Final rank"].nunique().max() == 1:
+        st.success("Robustness finding: the final integrated ranking does "
+                   "not change anywhere on this grid. The two charts above "
+                   "show the movement underneath (probabilities and expected "
+                   "ranks) that the discrete conclusion absorbs.")
+    st.caption("Note on lambda: it blends expert and AI intensity ratings, "
+               "so it moves nothing until both sources exist for at least "
+               "one scenario (rate scenarios on the Scenarios page).")
 
     st.subheader("2) Monte Carlo robustness of agent importance weights")
     n = st.slider("Draws", 100, 2000, 500, 100)
@@ -204,8 +235,19 @@ def sensitivity_page(jurisdiction="National"):
 def evidence_data(jurisdiction="National"):
     _strip(jurisdiction)
     st.title("Evidence & Data")
-    tabs = st.tabs(["Evidence Ledger", "Citations", "Derivations",
-                    "Scenario Registry", "Data Dictionary"])
+    tabs = st.tabs(["Master Dataset", "Evidence Ledger", "Citations",
+                    "Derivations", "Scenario Registry", "Data Dictionary"])
+    with tabs[0]:
+        from modules.agent_m_data import (get_active_decision_matrix,
+                                          build_harmonized_long_table)
+        with st.spinner("Loading the master matrix"):
+            wide = get_active_decision_matrix(jurisdiction=jurisdiction)
+        st.subheader("Active decision matrix (baseline plus live merge)")
+        st.dataframe(wide, width="stretch", hide_index=True)
+        with st.expander("Harmonized long table"):
+            st.dataframe(build_harmonized_long_table(wide), width="stretch",
+                         hide_index=True)
+    tabs = tabs[1:]
     with tabs[0]:
         led = load_ledger()
         if led.empty:

@@ -50,7 +50,12 @@ def render(jurisdiction: str = "National") -> None:
     alpha = c2.slider("alpha (frequency)", 0.0, 2.0, step=0.1, key="g_alpha")
     beta = c3.slider("beta (severity)", 0.0, 2.0, step=0.1, key="g_beta")
     gamma = c4.slider("gamma (system impact)", 0.0, 2.0, step=0.1, key="g_gamma")
-    model = c5.text_input("Gemini model", key="g_model")
+    model = c5.selectbox("Gemini model",
+                         genai.KNOWN_MODELS + ["custom"], key="g_model_pick")
+    if model == "custom":
+        model = c5.text_input("Custom model name", key="g_model_custom",
+                              placeholder="for example gemini-2.5-pro")
+    st.session_state["g_model"] = model
 
     if st.button("Assess all scenarios with Gemini",
                  disabled=not genai.gemini_available(),

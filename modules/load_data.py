@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+from modules.data_cache import read_excel_sheet
 import streamlit as st
 
 DATA_PATHS = [
@@ -15,7 +16,7 @@ def get_data_filepath() -> Path:
             return p
     return DATA_PATHS[0]
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def load_wide(file_path: str = None) -> pd.DataFrame:
     """
     Loads 'Baseline Data' from Research Data.xlsx, standardizes dual-tier headers,
@@ -25,7 +26,7 @@ def load_wide(file_path: str = None) -> pd.DataFrame:
     if not fp.exists():
         raise FileNotFoundError(f"Master file not found at: {fp}")
 
-    raw = pd.read_excel(fp, sheet_name="Baseline Data", header=None)
+    raw = read_excel_sheet(fp, sheet_name="Baseline Data", header=None)
 
     domains = (
         raw.iloc[0]
@@ -78,20 +79,20 @@ def load_wide(file_path: str = None) -> pd.DataFrame:
 
     return df_clean
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def load_data_dictionary(file_path: str = None) -> pd.DataFrame:
     """Loads criteria metadata definitions from Research Data.xlsx."""
     fp = Path(file_path) if file_path else get_data_filepath()
     if not fp.exists():
         raise FileNotFoundError(f"Master file not found at: {fp}")
 
-    raw_dd = pd.read_excel(fp, sheet_name="Data Dictionary")
+    raw_dd = read_excel_sheet(fp, sheet_name="Data Dictionary")
     regime_df = raw_dd.iloc[:, [5, 6, 7]].dropna(subset=[raw_dd.columns[5]]).copy()
     regime_df.columns = ["criterion_label", "data_regime", "live_source"]
     regime_df = regime_df[~regime_df["criterion_label"].str.match(r"^\d+\.", na=False)].reset_index(drop=True)
     return regime_df
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def load_citations(target_diseases: list = None, file_path: str = None) -> pd.DataFrame:
     """
     Loads research citations from the Citations sheet.
@@ -101,7 +102,7 @@ def load_citations(target_diseases: list = None, file_path: str = None) -> pd.Da
     if not fp.exists():
         raise FileNotFoundError(f"Master file not found at: {fp}")
 
-    cits = pd.read_excel(fp, sheet_name="Citations")
+    cits = read_excel_sheet(fp, sheet_name="Citations")
     cits.columns = [str(c).strip() for c in cits.columns]
 
     if not target_diseases:
@@ -124,7 +125,7 @@ def load_citations(target_diseases: list = None, file_path: str = None) -> pd.Da
     filtered = cits[cits["Target Disease"].apply(_matches_disease)].reset_index(drop=True)
     return filtered
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def load_derivations(target_diseases: list = None, file_path: str = None) -> pd.DataFrame:
     """Loads the Derivations sheet: the detailed calculation behind every
     derived baseline figure, for the dashboard's calculation audit view."""
@@ -132,7 +133,7 @@ def load_derivations(target_diseases: list = None, file_path: str = None) -> pd.
     if not fp.exists():
         raise FileNotFoundError(f"Master file not found at: {fp}")
     try:
-        der = pd.read_excel(fp, sheet_name="Derivations")
+        der = read_excel_sheet(fp, sheet_name="Derivations")
     except ValueError:
         return pd.DataFrame()
     der.columns = [str(c).strip() for c in der.columns]
@@ -143,12 +144,12 @@ def load_derivations(target_diseases: list = None, file_path: str = None) -> pd.
     return der
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def load_scenario_registry(file_path: str = None) -> pd.DataFrame:
     """Loads the Scenario Registry curated sheet (Section 10)."""
     fp = Path(file_path) if file_path else get_data_filepath()
     if not fp.exists():
         raise FileNotFoundError(f"Master file not found at: {fp}")
-    reg = pd.read_excel(fp, sheet_name="Scenario Registry")
+    reg = read_excel_sheet(fp, sheet_name="Scenario Registry")
     reg.columns = [str(c).strip() for c in reg.columns]
     return reg

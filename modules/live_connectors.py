@@ -2,6 +2,7 @@ import os
 import re
 import numpy as np
 import pandas as pd
+from modules.data_cache import read_excel_sheet
 import streamlit as st
 from typing import Dict, Any, Optional, Tuple
 from pathlib import Path
@@ -49,10 +50,10 @@ def get_state_full(jur: str) -> str:
         return "United States"
     return STATE_NAMES.get(code, jur.title())
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def load_raw_sheet(sheet_name: str) -> pd.DataFrame:
     fp = get_data_filepath()
-    df = pd.read_excel(fp, sheet_name=sheet_name, header=1)
+    df = read_excel_sheet(fp, sheet_name=sheet_name, header=1)
     df.columns = [str(c).strip().lower().replace(" ", "_").replace("-", "_") for c in df.columns]
     return df
 

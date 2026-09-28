@@ -143,7 +143,7 @@ def median_limits_for(profile: pd.DataFrame, criteria: List[str]) -> Dict[str, f
     return {c: float(sub[c].median(skipna=True)) for c in criteria}
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def _cached_run(agent_key: str, jurisdiction: str,
                 weights_items: tuple, limits_items: tuple,
                 selected: tuple, attainment_mode: str,

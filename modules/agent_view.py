@@ -91,7 +91,15 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
                     if series is None or (hasattr(series, "empty") and series.empty):
                         st.info("No time series available.")
                     else:
-                        st.line_chart(series)
+                        import plotly.graph_objects as _go
+                        from modules import ui as _ui
+                        _fig = _go.Figure()
+                        _df = series if hasattr(series, "columns") else series.to_frame()
+                        for _c in _df.columns:
+                            _fig.add_trace(_go.Scatter(x=_df.index, y=_df[_c],
+                                                       mode="lines", name=str(_c)))
+                        st.plotly_chart(_ui._base_layout(_fig, height=240),
+                                        use_container_width=True)
                 except Exception as e:
                     st.caption(f"Chart unavailable: {e}")
 
@@ -214,9 +222,11 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
                 "dimension the existing set misses; include policy or "
                 "advisory signals as rows with metric 'policy signal'.")
             try:
-                text, sources = _genai.call_gemini_grounded(
+                text, sources = _genai._with_fallback(
+                    _genai.call_gemini_grounded,
                     _os.environ.get("GEMINI_API_KEY", ""),
-                    "gemini-2.5-flash", prompt)
+                    st.session_state.get("g_model", "gemini-2.5-flash"),
+                    prompt)
                 raw = _re.sub(r"```(json)?", "", text).strip()
                 data = _json.loads(raw[raw.index("["): raw.rindex("]") + 1])
                 tbl = _pd.DataFrame(data)

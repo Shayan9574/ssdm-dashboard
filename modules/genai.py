@@ -1,8 +1,22 @@
 import json
 import os
+import re
 import requests
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
+KNOWN_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"]
+
+def normalize_model(name: str) -> str:
+    """'Gemini 3.1 Flash' -> 'gemini-3.1-flash'; empty -> default."""
+    n = str(name or "").strip().lower().replace(" ", "-")
+    return n or DEFAULT_GEMINI_MODEL
+
+def _scrub(msg: str) -> str:
+    key = os.environ.get("GEMINI_API_KEY", "")
+    m = str(msg)
+    if key:
+        m = m.replace(key, "***")
+    return re.sub(r"key=[^&\s]+", "key=***", m)
 
 def gemini_available() -> bool:
     return bool(os.environ.get("GEMINI_API_KEY"))
@@ -30,11 +44,12 @@ def call_openai_chat(api_key: str, model: str, prompt: str, temperature: float =
     return data["choices"][0]["message"]["content"]
 
 def call_gemini(api_key: str, model: str, prompt: str, temperature: float = 0.2):
+    model = normalize_model(model)
     if not api_key:
         raise ValueError("Missing Gemini API key.")
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json", "x-goog-api-key": api_key}
     payload = {
         "generationConfig": {"temperature": float(temperature)},
         "contents": [{"parts": [{"text": prompt}]}],
@@ -55,7 +70,7 @@ def call_gemini_grounded(api_key: str, model: str, prompt: str,
     if not api_key:
         raise ValueError("Missing Gemini API key.")
     url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
-           f"{model}:generateContent?key={api_key}")
+           f"{model}:generateContent")
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "tools": [{"google_search": {}}],
@@ -65,7 +80,7 @@ def call_gemini_grounded(api_key: str, model: str, prompt: str,
     data, last_err = None, None
     for attempt in range(3):
         try:
-            data = _post_json(url, {"Content-Type": "application/json"},
+            data = _post_json(url, {"Content-Type": "application/json", "x-goog-api-key": api_key},
                               payload, timeout=240)
             break
         except Exception as e:
@@ -83,3 +98,17 @@ def call_gemini_grounded(api_key: str, model: str, prompt: str,
             sources.append({"title": web.get("title", web["uri"]),
                             "uri": web["uri"]})
     return text.strip(), sources
+
+
+def _with_fallback(fn, api_key, model, *a, **kw):
+    try:
+        return fn(api_key, normalize_model(model), *a, **kw)
+    except Exception as e1:
+        m2 = DEFAULT_GEMINI_MODEL
+        if normalize_model(model) != m2:
+            try:
+                return fn(api_key, m2, *a, **kw)
+            except Exception as e2:
+                raise RuntimeError(_scrub(f"{e2} (after falling back from "
+                                          f"'{model}' to {m2})")) from None
+        raise RuntimeError(_scrub(str(e1))) from None

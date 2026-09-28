@@ -28,7 +28,7 @@ def render(jurisdiction: str = "National") -> None:
     lam = c1.slider("lambda", 0.0, 1.0, step=0.05, key="g_lam")
     alpha = c2.slider("alpha", 0.0, 2.0, step=0.1, key="g_alpha")
     beta = c3.slider("beta", 0.0, 2.0, step=0.1, key="g_beta")
-    gamma = c4.slider("gamma", 0.0, 2.0, step=0.1, key="g_g" "amma")
+    gamma = c4.slider("gamma", 0.0, 2.0, step=0.1, key="g_gamma")
     theta = c5.slider("theta (stability cut)", 0.5, 0.9, step=0.05, key="g_theta",
                       help="High stability when SI is at least theta.")
 
@@ -83,7 +83,8 @@ def render(jurisdiction: str = "National") -> None:
 
     # 4) synthesis
     st.subheader("4) Final Synthesis (AI written, results unchanged)")
-    model = st.text_input("Gemini model", key="g_model")
+    model = st.session_state.get("g_model", "gemini-2.5-flash")
+    st.caption(f"Gemini model: {model} (chosen on the Scenarios page)")
     if st.button("Generate synthesis", disabled=not genai.gemini_available()):
         with st.spinner("Writing the synthesis"):
             quads = {k: sc.quadrants(

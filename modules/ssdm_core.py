@@ -56,7 +56,7 @@ def _rank_map(result) -> Dict[str, int]:
     return {a: i + 1 for i, a in enumerate(result.order)}
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def indicators(agent_key: str, jurisdiction: str, lam: float, alpha: float,
                beta: float, gamma: float, mode: str) -> pd.DataFrame:
     p_map = se.probability_map(lam, alpha, beta, gamma)
@@ -115,7 +115,7 @@ def get_agent_weights() -> Tuple[Dict[str, float], str]:
     return wm.get_weights("agent_level::global", list(AGENTS))
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def second_order(jurisdiction: str, lam: float, alpha: float, beta: float,
                  gamma: float, mode: str,
                  use_baseline: bool = False) -> pd.DataFrame:
@@ -161,7 +161,7 @@ def cross_agent_run(jurisdiction: str, lam: float, alpha: float, beta: float,
 
 def _gemini(prompt: str, model: str) -> str:
     key = os.environ.get("GEMINI_API_KEY", "")
-    return genai.call_gemini(key, model, prompt, temperature=0.3)
+    return genai._with_fallback(genai.call_gemini, key, model, prompt, temperature=0.3)
 
 
 def synthesize(final_table: pd.DataFrame, quad_tables: Dict[str, pd.DataFrame],

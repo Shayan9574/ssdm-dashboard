@@ -12,7 +12,7 @@ from modules.live_connectors import (
     get_wastewater_surveillance,
 )
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def build_harmonized_long_table() -> pd.DataFrame:
     """
     Constructs the harmonized long table under strict zero-imputation rules.
@@ -56,7 +56,7 @@ def build_harmonized_long_table() -> pd.DataFrame:
 
     return df_long
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def build_hybrid_decision_matrix(
     jurisdiction: str = "National",
     lag_complete_weeks: int = 1

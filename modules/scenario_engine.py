@@ -84,7 +84,7 @@ EMPHASIS_ALIASES: Dict[str, List[str]] = {
 # registry and scenario weight profiles
 # ----------------------------------------------------------------------
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=21600)
 def get_registry() -> pd.DataFrame:
     reg = load_scenario_registry()
     reg["weighted"] = reg["Status"].astype(str).str.startswith("weighted")
@@ -174,7 +174,7 @@ def gemini_assess(scenario_row: pd.Series,
         '{"severity": "<term>", "system_impact": "<term>", '
         '"justification": "<two sentences>"}')
     key = os.environ.get("GEMINI_API_KEY", "")
-    raw = genai.call_gemini(key, model, prompt, temperature=0.2)
+    raw = genai._with_fallback(genai.call_gemini, key, model, prompt, temperature=0.2)
     txt = re.sub(r"```(json)?", "", raw).strip()
     data = json.loads(txt[txt.index("{"): txt.rindex("}") + 1])
     sev = str(data.get("severity", DEFAULT_TERM)).title()
@@ -245,7 +245,7 @@ def probability_map(lam=0.7, alpha=1.0, beta=1.0, gamma=1.0) -> Dict[str, float]
 # scenario re runs and stability (Sections 12 and 13)
 # ----------------------------------------------------------------------
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def _scenario_run(agent_key: str, scenario_id: Optional[str],
                   jurisdiction: str, mode: str,
                   weights_items: tuple, use_overlay: bool = False,

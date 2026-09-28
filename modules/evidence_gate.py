@@ -162,8 +162,9 @@ def check_definition(row: dict, criterion: str,
                 "population level rate for the named disease (not restricted "
                 "to hospitalized patients unless the subcriterion says so)?\n"
                 f"Item: {json.dumps({k: str(row.get(k, '')) for k in ('disease', 'metric', 'value', 'unit', 'timeframe', 'use')})}")
-            raw = genai.call_gemini(os.environ.get("GEMINI_API_KEY", ""),
-                                    model, prompt, temperature=0.0)
+            raw = genai._with_fallback(genai.call_gemini,
+                                       os.environ.get("GEMINI_API_KEY", ""),
+                                       model, prompt, temperature=0.0)
             txt = re.sub(r"```(json)?", "", raw).strip()
             data = json.loads(txt[txt.index("{"): txt.rindex("}") + 1])
             if not bool(data.get("match", False)):
@@ -191,7 +192,7 @@ def check_corroboration(row: dict, harmonized: float,
             "\"source_title\": \"<title>\"}.\n"
             f"Quantity: {row.get('metric')} for {row.get('disease')}, "
             f"{row.get('timeframe')}, in {row.get('unit')}.")
-        text, _ = genai.call_gemini_grounded(
+        text, _ = genai._with_fallback(genai.call_gemini_grounded,
             os.environ.get("GEMINI_API_KEY", ""), model, prompt, 0.0)
         txt = re.sub(r"```(json)?", "", text).strip()
         data = json.loads(txt[txt.index("{"): txt.rindex("}") + 1])
@@ -261,7 +262,7 @@ def append_ledger(report: pd.DataFrame) -> int:
     return len(report)
 
 
-@st.cache_data(ttl=900)
+@st.cache_data(ttl=21600)
 def load_ledger() -> pd.DataFrame:
     try:
         return pd.read_csv(_ledger_path())
