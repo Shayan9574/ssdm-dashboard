@@ -12,7 +12,7 @@ Statuses: DONE, PARTIAL (with what remains), PENDING (checkpoint letter).
 | 3 Data regime typology (Types 1, 2, 3) | Classify by data regime | Data Dictionary sheet + modules/load_data.load_data_dictionary | DONE |
 | 4 Agents O, H, L; recursion; Agent M merge | Route to acquisition agents; Agent M | Agent O and L: refresh_data.py + agent_m_data.py; recursion: launcher staleness loop; RESP-NET full history feed (kvib-3txy) added at C3. Agent H reconciliation display | PARTIAL: reconciliation polish assigned to the review pass |
 | 5 Eight domain agents | Distribute to eight agents | modules/agent_engine.AGENTS + modules/agent_view.py, all eight pages on the shared renderer | DONE |
-| 5 AI enrichment (additive only) | AI evidence enrichment | Enrichment expander on every agent page (Serper search plus Gemini summary), strictly additive, never enters the matrix | DONE |
+| 5 AI enrichment plus Evidence Gate | AI evidence enrichment | Structured retrieval on every agent page; automated four check gate (source, schema and plausibility with scale harmonization, definition audit, independent corroboration); Evidence Ledger sheet persisted to the workbook; validated rows apply as a labeled, toggleable overlay, quarantined rows visible with reasons; baseline never overwritten | DONE |
 | 6 Surveillance pipeline, six feeds, weekly | Live sources | scripts/refresh_data.py + GitHub or launch refresh | DONE |
 | 7.1 Fuzzy chain, GMIR, five term scale | Weight Manager | modules/weight_manager.py gmir, IMPORTANCE_SCALE | DONE |
 | 7.2 Criterion level and agent level modes; multi expert mean | Weight Manager modes | criterion level per agent; agent level W_g elicitation on the SSDM Integration page (four modes) | DONE |
