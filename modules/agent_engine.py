@@ -146,12 +146,19 @@ def median_limits_for(profile: pd.DataFrame, criteria: List[str]) -> Dict[str, f
 @st.cache_data(ttl=900, show_spinner=False)
 def _cached_run(agent_key: str, jurisdiction: str,
                 weights_items: tuple, limits_items: tuple,
-                selected: tuple, attainment_mode: str) -> MOSDMResult:
+                selected: tuple, attainment_mode: str,
+                use_overlay: bool = False,
+                overlay_items: tuple = ()) -> MOSDMResult:
     cfg = AGENTS[agent_key]
     wide = get_active_decision_matrix(jurisdiction=jurisdiction)
     wide = wide[wide["Disease Type"].isin(list(selected))]
     profile = cfg["profile"](wide, jurisdiction)
     profile = profile[profile["Disease Type"].isin(list(selected))]
+    if use_overlay and overlay_items:
+        for (dis, crit), v in dict(overlay_items).items():
+            m = profile["Disease Type"].astype(str) == dis
+            if m.any() and crit in profile.columns:
+                profile.loc[m, crit] = v
     return run_mosdm(
         profile, cfg["criteria"], cfg["directions"],
         weights=dict(weights_items) or None,
@@ -174,8 +181,13 @@ def run_agent(agent_key: str, jurisdiction: str,
     weights, wprov = wm.get_weights(agent_key, cfg["criteria"])
     limits, lprov = wm.get_expert_limits(agent_key)
     mode = st.session_state.get("attainment_mode", "graded_calibrated")
+    use_ov = bool(st.session_state.get("use_evidence_overlay", True))
+    ov = ()
+    if use_ov:
+        from modules.evidence_gate import overlay_for
+        ov = tuple(sorted(overlay_for(agent_key, cfg["criteria"]).items()))
     result = _cached_run(agent_key, jurisdiction,
                          tuple(sorted(weights.items())),
                          tuple(sorted(limits.items())),
-                         tuple(selected), mode)
+                         tuple(selected), mode, use_ov, ov)
     return profile, result, weights, wprov, limits, lprov

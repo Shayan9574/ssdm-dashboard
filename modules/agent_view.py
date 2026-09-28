@@ -114,6 +114,20 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
                "Change either above and the stratification below recomputes.")
 
     # 4) updated MOSDM stratification
+    from modules.evidence_gate import overlay_for as _ovf
+    _ov = _ovf(agent_key, cfg["criteria"])
+    tcol, bcol = st.columns([1, 2])
+    with tcol:
+        st.toggle("Include evidence overlay", value=True,
+                  key="use_evidence_overlay",
+                  help="Gate validated evidence applied on top of the curated "
+                       "baseline; switch off to compare against the baseline "
+                       "alone.")
+    with bcol:
+        if _ov and st.session_state.get("use_evidence_overlay", True):
+            st.caption(f"Results include {len(_ov)} gate validated evidence "
+                       "item(s); details in the Gate report and the Evidence "
+                       "Ledger sheet.")
     st.selectbox("Attainment mode", list(MODES), format_func=MODES.get,
                  key="attainment_mode",
                  help="Graded attainment anchors credit at the acceptable "
@@ -206,22 +220,36 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
                 raw = _re.sub(r"```(json)?", "", text).strip()
                 data = _json.loads(raw[raw.index("["): raw.rindex("]") + 1])
                 tbl = _pd.DataFrame(data)
-                tbl["provenance"] = "AI retrieved, pending review"
                 st.session_state[f"enr_tbl_{agent_key}"] = tbl
+                from modules import evidence_gate as _eg
+                with st.spinner("Evidence Gate: source, schema, definition, "
+                                "corroboration"):
+                    report = _eg.run_gate(tbl.to_dict("records"), profile,
+                                          cfg["criteria"], agent_key)
+                written = _eg.append_ledger(report)
+                _cached_run.clear() if False else None
+                st.cache_data.clear()
+                n_ok = int((report["status"] == "validated").sum())
+                n_q = int((report["status"] == "quarantined").sum())
+                st.success(f"Gate complete: {n_ok} validated and applied as "
+                           f"the evidence overlay, {n_q} quarantined, "
+                           f"{written - n_ok - n_q} informational; ledger "
+                           "updated on the workbook.")
+                st.session_state[f"enr_rep_{agent_key}"] = report
             except Exception as e:
                 st.error(f"Enrichment failed: {e}")
-        tbl = st.session_state.get(f"enr_tbl_{agent_key}")
-        if tbl is not None:
-            st.dataframe(tbl, width="stretch", hide_index=True)
-            st.download_button(
-                "Download for curation review (CSV)",
-                tbl.to_csv(index=False),
-                f"evidence_enrichment_{agent_key}.csv",
-                key=f"enr_dl_{agent_key}")
-            st.caption("Every row is a candidate: values enter the curated "
-                       "seed only through the review process, with citation "
-                       "and derivation rows; rows marked NEW propose "
-                       "subcriteria for the framework discussion.")
+        rep = st.session_state.get(f"enr_rep_{agent_key}")
+        if rep is not None:
+            st.markdown("**Gate report (every row, every check, every reason)**")
+            st.dataframe(rep, width="stretch", hide_index=True)
+            st.download_button("Download gate report (CSV)",
+                               rep.to_csv(index=False),
+                               f"evidence_gate_report_{agent_key}.csv",
+                               key=f"enr_dl_{agent_key}")
+            st.caption("Validated rows overlay the affected values and the "
+                       "stratification recomputes; quarantined rows are kept "
+                       "visible with their failure reasons and change "
+                       "nothing. The curated baseline is never overwritten.")
 
     # 5) evidence base
     st.divider()

@@ -248,12 +248,18 @@ def probability_map(lam=0.7, alpha=1.0, beta=1.0, gamma=1.0) -> Dict[str, float]
 @st.cache_data(ttl=900, show_spinner=False)
 def _scenario_run(agent_key: str, scenario_id: Optional[str],
                   jurisdiction: str, mode: str,
-                  weights_items: tuple) -> MOSDMResult:
+                  weights_items: tuple, use_overlay: bool = False,
+                  overlay_items: tuple = ()) -> MOSDMResult:
     cfg = AGENTS[agent_key]
     wide = get_active_decision_matrix(jurisdiction=jurisdiction)
     wide = wide[wide["Disease Type"].isin(CORE4)]
     profile = cfg["profile"](wide, jurisdiction)
     profile = profile[profile["Disease Type"].isin(CORE4)]
+    if use_overlay and overlay_items:
+        for (dis, crit), v in dict(overlay_items).items():
+            m = profile["Disease Type"].astype(str) == dis
+            if m.any() and crit in profile.columns:
+                profile.loc[m, crit] = v
     return run_mosdm(profile, cfg["criteria"], cfg["directions"],
                      weights=dict(weights_items) or None,
                      attainment_mode=mode, alternative_col="Disease Type")
@@ -268,8 +274,14 @@ def run_scenario(agent_key: str, scenario_id: Optional[str],
         w, prov = wm.get_weights(agent_key, AGENTS[agent_key]["criteria"])
     else:
         w, prov = scenario_weights(scenario_id, agent_key)
+    use_ov = bool(st.session_state.get("use_evidence_overlay", True))
+    ov = ()
+    if use_ov:
+        from modules.evidence_gate import overlay_for
+        ov = tuple(sorted(overlay_for(agent_key,
+                                      AGENTS[agent_key]["criteria"]).items()))
     res = _scenario_run(agent_key, scenario_id, jurisdiction, mode,
-                        tuple(sorted(w.items())))
+                        tuple(sorted(w.items())), use_ov, ov)
     return res, prov
 
 
