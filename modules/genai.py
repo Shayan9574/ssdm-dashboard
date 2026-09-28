@@ -47,3 +47,28 @@ def call_gemini(api_key: str, model: str, prompt: str, temperature: float = 0.2)
     parts = cands[0].get("content", {}).get("parts", [])
     txt = [p["text"] for p in parts if "text" in p]
     return "\n".join(txt).strip()
+
+def call_gemini_grounded(api_key: str, model: str, prompt: str,
+                         temperature: float = 0.3):
+    """Gemini with Google Search grounding: returns (text, sources), where
+    sources is a list of {title, uri} drawn from the grounding metadata."""
+    if not api_key:
+        raise ValueError("Missing Gemini API key.")
+    url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+           f"{model}:generateContent?key={api_key}")
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "tools": [{"google_search": {}}],
+        "generationConfig": {"temperature": temperature},
+    }
+    data = _post_json(url, {"Content-Type": "application/json"}, payload)
+    cand = (data.get("candidates") or [{}])[0]
+    text = "".join(p.get("text", "")
+                   for p in cand.get("content", {}).get("parts", []))
+    sources = []
+    for ch in cand.get("groundingMetadata", {}).get("groundingChunks", []):
+        web = ch.get("web", {})
+        if web.get("uri"):
+            sources.append({"title": web.get("title", web["uri"]),
+                            "uri": web["uri"]})
+    return text.strip(), sources

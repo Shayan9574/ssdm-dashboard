@@ -171,32 +171,44 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
     # 4b) AI evidence enrichment (Section 5): strictly additive context
     with st.expander("AI evidence enrichment (additive, never enters the matrix)"):
         import os as _os
-        from modules import evidence as _ev
         from modules import genai as _genai
-        q = st.text_input("Enrichment query",
-                          f"{' and '.join(selected[:2])} {cfg['title'].split(':')[1]} latest CDC evidence",
-                          key=f"enr_q_{agent_key}")
+        q = st.text_input(
+            "Enrichment query",
+            f"{' and '.join(selected[:2])} {cfg['title'].split(':')[1]} latest CDC evidence",
+            key=f"enr_q_{agent_key}")
         serper_key = _os.environ.get("SERPER_API_KEY", "")
         if st.button("Search and summarize", key=f"enr_b_{agent_key}",
-                     disabled=not serper_key,
-                     help="Requires SERPER_API_KEY in Colab Secrets; results are "
+                     disabled=not (_genai.gemini_available() or serper_key),
+                     help="Live web grounding through Gemini; results are "
                           "context for the analyst and never modify any value."):
             try:
-                hits = _ev.serper_search(serper_key, q, num=5)
-                for h in hits:
-                    st.markdown(f"- [{h['title']}]({h['link']}): {h['snippet']}")
-                if _genai.gemini_available() and hits:
-                    joined = "\n".join(f"{h['title']}: {h['snippet']}" for h in hits)
-                    summary = _genai.call_gemini(
+                if serper_key:
+                    from modules import evidence as _ev
+                    hits = _ev.serper_search(serper_key, q, num=5)
+                    for h in hits:
+                        st.markdown(f"- [{h['title']}]({h['link']}): {h['snippet']}")
+                    if _genai.gemini_available() and hits:
+                        joined = "\n".join(f"{h['title']}: {h['snippet']}" for h in hits)
+                        st.info(_genai.call_gemini(
+                            _os.environ.get("GEMINI_API_KEY", ""),
+                            "gemini-2.5-flash",
+                            "Summarize these search snippets in three sentences "
+                            "of public health context. Cite nothing not present.\n"
+                            + joined))
+                else:
+                    text, sources = _genai.call_gemini_grounded(
                         _os.environ.get("GEMINI_API_KEY", ""),
                         "gemini-2.5-flash",
-                        "Summarize these search snippets in three sentences of "
-                        "public health context. Cite nothing not present.\n" + joined)
-                    st.info(summary)
+                        "Search the current web and summarize, in four "
+                        "sentences for a public health analyst, the latest "
+                        "evidence on: " + q)
+                    st.info(text)
+                    for s2 in sources:
+                        st.markdown(f"- [{s2['title']}]({s2['uri']})")
             except Exception as e:
                 st.error(f"Enrichment failed: {e}")
-        if not serper_key:
-            st.caption("Add SERPER_API_KEY in Colab Secrets (and Cell 4) to enable.")
+        if not (_genai.gemini_available() or serper_key):
+            st.caption("Add GEMINI_API_KEY in Colab Secrets to enable.")
 
     # 5) evidence base
     st.divider()
