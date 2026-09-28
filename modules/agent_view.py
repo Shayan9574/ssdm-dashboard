@@ -168,47 +168,60 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
             st.markdown("**Tier separations (S gap):** " + ", ".join(
                 f"tier {t} to {t+1}: {g}" for t, g in result.separations.items()))
 
-    # 4b) AI evidence enrichment (Section 5): strictly additive context
-    with st.expander("AI evidence enrichment (additive, never enters the matrix)"):
-        import os as _os
+    # 4b) Structured AI evidence enrichment (Section 5): additive external
+    # evidence tier; reviewable, calculation ready, never auto written
+    with st.expander("AI evidence enrichment: structured external evidence "
+                     "(additive, human approval required)"):
+        import json as _json, re as _re, os as _os
+        import pandas as _pd
         from modules import genai as _genai
         q = st.text_input(
-            "Enrichment query",
-            f"{' and '.join(selected[:2])} {cfg['title'].split(':')[1]} latest CDC evidence",
-            key=f"enr_q_{agent_key}")
-        serper_key = _os.environ.get("SERPER_API_KEY", "")
-        if st.button("Search and summarize", key=f"enr_b_{agent_key}",
-                     disabled=not (_genai.gemini_available() or serper_key),
-                     help="Live web grounding through Gemini; results are "
-                          "context for the analyst and never modify any value."):
+            "Scope", f"{', '.join(selected)}: {cfg['title'].split(':')[1].strip()}",
+            key=f"enr_q_{agent_key}",
+            help="All selected diseases are covered; edit to narrow or widen.")
+        if st.button("Retrieve structured evidence", key=f"enr_b_{agent_key}",
+                     disabled=not _genai.gemini_available()):
+            prompt = (
+                "You are the external evidence tier of a public health "
+                "prioritization system. Using live web search, gather the "
+                "most decision relevant, recent, quantitative evidence for "
+                "EVERY disease listed, within this analytical domain: "
+                f"{q}.\n"
+                f"Existing subcriteria in this domain: {cfg['criteria']}.\n"
+                "Return ONLY a JSON array (no markdown fences). Each element: "
+                '{"disease": str, "metric": str, "value": str, "unit": str, '
+                '"timeframe": str, "source_title": str, "source_url": str, '
+                '"maps_to": "<one existing subcriterion, or NEW: <proposed '
+                'name>>", "use": "one sentence on how a decision maker or '
+                'the model can use this number"}. '
+                "Include at least one row per disease; prefer official "
+                "sources (CDC, WHO, peer reviewed); include candidate NEW "
+                "subcriteria when the evidence suggests a measurable "
+                "dimension the existing set misses; include policy or "
+                "advisory signals as rows with metric 'policy signal'.")
             try:
-                if serper_key:
-                    from modules import evidence as _ev
-                    hits = _ev.serper_search(serper_key, q, num=5)
-                    for h in hits:
-                        st.markdown(f"- [{h['title']}]({h['link']}): {h['snippet']}")
-                    if _genai.gemini_available() and hits:
-                        joined = "\n".join(f"{h['title']}: {h['snippet']}" for h in hits)
-                        st.info(_genai.call_gemini(
-                            _os.environ.get("GEMINI_API_KEY", ""),
-                            "gemini-2.5-flash",
-                            "Summarize these search snippets in three sentences "
-                            "of public health context. Cite nothing not present.\n"
-                            + joined))
-                else:
-                    text, sources = _genai.call_gemini_grounded(
-                        _os.environ.get("GEMINI_API_KEY", ""),
-                        "gemini-2.5-flash",
-                        "Search the current web and summarize, in four "
-                        "sentences for a public health analyst, the latest "
-                        "evidence on: " + q)
-                    st.info(text)
-                    for s2 in sources:
-                        st.markdown(f"- [{s2['title']}]({s2['uri']})")
+                text, sources = _genai.call_gemini_grounded(
+                    _os.environ.get("GEMINI_API_KEY", ""),
+                    "gemini-2.5-flash", prompt)
+                raw = _re.sub(r"```(json)?", "", text).strip()
+                data = _json.loads(raw[raw.index("["): raw.rindex("]") + 1])
+                tbl = _pd.DataFrame(data)
+                tbl["provenance"] = "AI retrieved, pending review"
+                st.session_state[f"enr_tbl_{agent_key}"] = tbl
             except Exception as e:
                 st.error(f"Enrichment failed: {e}")
-        if not (_genai.gemini_available() or serper_key):
-            st.caption("Add GEMINI_API_KEY in Colab Secrets to enable.")
+        tbl = st.session_state.get(f"enr_tbl_{agent_key}")
+        if tbl is not None:
+            st.dataframe(tbl, width="stretch", hide_index=True)
+            st.download_button(
+                "Download for curation review (CSV)",
+                tbl.to_csv(index=False),
+                f"evidence_enrichment_{agent_key}.csv",
+                key=f"enr_dl_{agent_key}")
+            st.caption("Every row is a candidate: values enter the curated "
+                       "seed only through the review process, with citation "
+                       "and derivation rows; rows marked NEW propose "
+                       "subcriteria for the framework discussion.")
 
     # 5) evidence base
     st.divider()
