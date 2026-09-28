@@ -245,7 +245,7 @@ def evidence_data(jurisdiction="National"):
         st.subheader("Active decision matrix (baseline plus live merge)")
         st.dataframe(wide, width="stretch", hide_index=True)
         with st.expander("Harmonized long table"):
-            st.dataframe(build_harmonized_long_table(wide), width="stretch",
+            st.dataframe(build_harmonized_long_table(), width="stretch",
                          hide_index=True)
     tabs = tabs[1:]
     with tabs[0]:
