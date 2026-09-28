@@ -7,7 +7,7 @@ DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 def gemini_available() -> bool:
     return bool(os.environ.get("GEMINI_API_KEY"))
 
-def _post_json(url, headers, payload, timeout=60):
+def _post_json(url, headers, payload, timeout=150):
     r = requests.post(url, headers=headers, json=payload, timeout=timeout)
     r.raise_for_status()
     return r.json()
@@ -61,7 +61,18 @@ def call_gemini_grounded(api_key: str, model: str, prompt: str,
         "tools": [{"google_search": {}}],
         "generationConfig": {"temperature": temperature},
     }
-    data = _post_json(url, {"Content-Type": "application/json"}, payload)
+    import time as _time
+    data, last_err = None, None
+    for attempt in range(3):
+        try:
+            data = _post_json(url, {"Content-Type": "application/json"},
+                              payload, timeout=240)
+            break
+        except Exception as e:
+            last_err = e
+            _time.sleep(5 * (attempt + 1))
+    if data is None:
+        raise last_err
     cand = (data.get("candidates") or [{}])[0]
     text = "".join(p.get("text", "")
                    for p in cand.get("content", {}).get("parts", []))
