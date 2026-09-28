@@ -25,11 +25,11 @@ def render(jurisdiction: str = "National") -> None:
                    "agent run, and the final synthesis.")
     mode = st.session_state.get("attainment_mode", "graded_calibrated")
     c1, c2, c3, c4, c5 = st.columns(5)
-    lam = c1.slider("lambda", 0.0, 1.0, 0.7, 0.05, key="ss_lam")
-    alpha = c2.slider("alpha", 0.0, 2.0, 1.0, 0.1, key="ss_a")
-    beta = c3.slider("beta", 0.0, 2.0, 1.0, 0.1, key="ss_b")
-    gamma = c4.slider("gamma", 0.0, 2.0, 1.0, 0.1, key="ss_g")
-    theta = c5.slider("theta (stability cut)", 0.5, 0.9, 0.7, 0.05,
+    lam = c1.slider("lambda", 0.0, 1.0, step=0.05, key="g_lam")
+    alpha = c2.slider("alpha", 0.0, 2.0, step=0.1, key="g_alpha")
+    beta = c3.slider("beta", 0.0, 2.0, step=0.1, key="g_beta")
+    gamma = c4.slider("gamma", 0.0, 2.0, step=0.1, key="g_g" "amma")
+    theta = c5.slider("theta (stability cut)", 0.5, 0.9, step=0.05, key="g_theta",
                       help="High stability when SI is at least theta.")
 
     # 1) indicators and quadrants per agent
@@ -83,7 +83,7 @@ def render(jurisdiction: str = "National") -> None:
 
     # 4) synthesis
     st.subheader("4) Final Synthesis (AI written, results unchanged)")
-    model = st.text_input("Gemini model", se.DEFAULT_GEMINI_MODEL, key="ss_model")
+    model = st.text_input("Gemini model", key="g_model")
     if st.button("Generate synthesis", disabled=not genai.gemini_available()):
         with st.spinner("Writing the synthesis"):
             quads = {k: sc.quadrants(

@@ -185,7 +185,7 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
     # 4b) Structured AI evidence enrichment (Section 5): additive external
     # evidence tier; reviewable, calculation ready, never auto written
     with st.expander("AI evidence enrichment: structured external evidence "
-                     "(additive, human approval required)"):
+                     "(automated Evidence Gate)"):
         import json as _json, re as _re, os as _os
         import pandas as _pd
         from modules import genai as _genai
@@ -227,7 +227,6 @@ def render_agent(agent_key: str, jurisdiction: str = "National") -> None:
                     report = _eg.run_gate(tbl.to_dict("records"), profile,
                                           cfg["criteria"], agent_key)
                 written = _eg.append_ledger(report)
-                _cached_run.clear() if False else None
                 st.cache_data.clear()
                 n_ok = int((report["status"] == "validated").sum())
                 n_q = int((report["status"] == "quarantined").sum())

@@ -46,11 +46,11 @@ def render(jurisdiction: str = "National") -> None:
                       "(GMIR defuzzification), from experts and from the "
                       "Gemini assessor, blended with lambda (expert dominant).")
     c1, c2, c3, c4, c5 = st.columns(5)
-    lam = c1.slider("lambda (expert share)", 0.0, 1.0, 0.7, 0.05)
-    alpha = c2.slider("alpha (frequency)", 0.0, 2.0, 1.0, 0.1)
-    beta = c3.slider("beta (severity)", 0.0, 2.0, 1.0, 0.1)
-    gamma = c4.slider("gamma (system impact)", 0.0, 2.0, 1.0, 0.1)
-    model = c5.text_input("Gemini model", se.DEFAULT_GEMINI_MODEL)
+    lam = c1.slider("lambda (expert share)", 0.0, 1.0, step=0.05, key="g_lam")
+    alpha = c2.slider("alpha (frequency)", 0.0, 2.0, step=0.1, key="g_alpha")
+    beta = c3.slider("beta (severity)", 0.0, 2.0, step=0.1, key="g_beta")
+    gamma = c4.slider("gamma (system impact)", 0.0, 2.0, step=0.1, key="g_gamma")
+    model = c5.text_input("Gemini model", key="g_model")
 
     if st.button("Assess all scenarios with Gemini",
                  disabled=not genai.gemini_available(),

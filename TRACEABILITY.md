@@ -30,7 +30,9 @@ Statuses: DONE, PARTIAL (with what remains), PENDING (checkpoint letter).
 | 16 Second order matrix, agent weights W_g | Final integration | ssdm_core.second_order (Agent 5 inverted at integration), W_g via Weight Manager agent level scope | DONE |
 | 17 Cross agent SSDM | Apply SSDM across agents | ssdm_core.cross_agent_run: second generation MOSDM on the expected rank matrix, parallel baseline reference run | DONE |
 | 18 Final synthesis (AI, never alters results) | Generate final synthesis | ssdm_core.synthesize on the Integration page, labeled, numbers sourced from the engine only | DONE |
-| 19 Outputs page | Outputs | Downloads section on the Integration page (final stratification, second order matrix, indicators as CSV); full outputs design at checkpoint E | PARTIAL (E) |
+| 19 Outputs page | Outputs | Overview leads with the final integrated stratification, quadrants, probability mass, signals; downloads on Integration and Evidence pages | DONE |
+| Checkpoint E interface | | Design system (modules/ui.py, theme), seven page navigation with Domain Agents consolidated, persistent context strip, Plotly visualization, Evidence & Data home, Elicitation Studio, mockup approved in chat | DONE |
+| Sensitivity & Simulation (approved addition) | | modules/sensitivity.py + page: parameter sweeps (lambda, exponents) with rank trajectories, Dirichlet Monte Carlo on W_g with tier probabilities and rank distributions, theta sweep, attainment mode comparison | DONE |
 | Standing rule: calculation audit beside every derived number | | Derivations sheet + load_derivations + agent_view expander | DONE |
 | Standing rule: engine provenance label on results | | agent_view ENGINE_BADGE | DONE |
 | Standing rule: co-equal tier asks the user in the dashboard | | agent_view warning prompt with elicitation path | DONE |
