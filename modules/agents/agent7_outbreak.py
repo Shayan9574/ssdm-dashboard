@@ -21,7 +21,16 @@ def build_agent7_profile(
         df["Geographic Spread Status"] = "Unknown"
 
     spread_map = {"widespread": 3.0, "regional": 2.0, "local": 1.0, "sporadic": 0.5, "unknown": 1.0}
-    df["Geographic Spread Risk (Score)"] = df["Geographic Spread Status"].str.lower().map(lambda x: spread_map.get(x, 1.0))
+    # Substring match: the curated statuses are compound labels such as
+    # "Widespread/Endemic" and "Localized Clusters"; exact keys never matched,
+    # which scored every disease 1.0 (fixed in Checkpoint F).
+    def _score(x: str) -> float:
+        x = str(x).lower()
+        for key in ("widespread", "regional", "local", "sporadic"):
+            if key in x:
+                return spread_map[key]
+        return spread_map["unknown"]
+    df["Geographic Spread Risk (Score)"] = df["Geographic Spread Status"].apply(_score)
 
     rt_data = get_rt_surveillance(jurisdiction=jurisdiction, lag_complete_weeks=lag_complete_weeks)
 

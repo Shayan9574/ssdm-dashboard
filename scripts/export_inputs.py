@@ -138,6 +138,21 @@ def main() -> None:
         return pd.DataFrame(rows)
     sheets["Agents"] = _attempt("Agents", agents)
 
+    # 3b. harmonization log, readiness report, live coverage design
+    from modules.load_data import harmonization_log
+    from modules import live_subcriteria as ls
+    from modules import readiness
+    sheets["Harmonization_Log"] = _attempt("Harmonization_Log", harmonization_log)
+    sheets["Readiness"] = _attempt("Readiness",
+                                   lambda: pd.DataFrame(readiness.evaluate(JUR)))
+    sheets["Live_Not_Admitted"] = _attempt("Live_Not_Admitted", lambda: pd.DataFrame(
+        ls.NOT_ADMITTED, columns=["Agent", "Subcriterion", "Reason"]))
+
+    def hist_rows(tag):
+        return pd.DataFrame([{"As_of": tag, "Criterion": c, **v}
+                             for c, v in ls.historical_stats(JUR).items()])
+    sheets["Historical_Stats"] = _attempt("Historical_Stats", lambda: hist_rows("current"))
+
     # 4. current decision matrices
     sheets["Profiles_Current"] = _attempt(
         "Profiles_Current",
@@ -194,18 +209,20 @@ def main() -> None:
             _install_as_of()
             end = pd.Timestamp(datetime.now(timezone.utc).date())
             dates = pd.date_range(REPLAY_START, end, freq="7D")
-            frames = []
+            frames, hframes = [], []
             for i, d in enumerate(dates):
                 AS_OF[0] = d
                 try:
                     p = _profiles(AGENTS, CORE4, build_hybrid_decision_matrix)
                     p.insert(0, "As_of", d.date().isoformat())
                     frames.append(p)
+                    hframes.append(hist_rows(d.date().isoformat()))
                 except Exception as exc:  # noqa: BLE001
                     _log(f"replay {d.date()}", "FAILED", str(exc))
                 if i % 20 == 0:
                     print(f"  replay {i + 1}/{len(dates)} {d.date()}", flush=True)
             AS_OF[0] = None
+            sheets["Replay_Historical_Stats"] = pd.concat(hframes, ignore_index=True)
             return pd.concat(frames, ignore_index=True)
         sheets["Replay_Profiles"] = _attempt("Replay_Profiles", replay)
 

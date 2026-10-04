@@ -249,7 +249,7 @@ def probability_map(lam=0.7, alpha=1.0, beta=1.0, gamma=1.0) -> Dict[str, float]
 def _scenario_run(agent_key: str, scenario_id: Optional[str],
                   jurisdiction: str, mode: str,
                   weights_items: tuple, use_overlay: bool = False,
-                  overlay_items: tuple = ()) -> MOSDMResult:
+                  overlay_items: tuple = (), limits_items: tuple = ()) -> MOSDMResult:
     cfg = AGENTS[agent_key]
     wide = get_active_decision_matrix(jurisdiction=jurisdiction)
     wide = wide[wide["Disease Type"].isin(CORE4)]
@@ -260,9 +260,51 @@ def _scenario_run(agent_key: str, scenario_id: Optional[str],
             m = profile["Disease Type"].astype(str) == dis
             if m.any() and crit in profile.columns:
                 profile.loc[m, crit] = v
-    return run_mosdm(profile, cfg["criteria"], cfg["directions"],
+    from modules.agent_engine import active_criteria, historical_limits_for
+    act = active_criteria(profile, agent_key)
+    return run_mosdm(profile, act, cfg["directions"],
                      weights=dict(weights_items) or None,
+                     expert_limits=dict(limits_items) or None,
+                     historical_limits=historical_limits_for(act, jurisdiction),
                      attainment_mode=mode, alternative_col="Disease Type")
+
+
+def scenario_limit_overrides(scenario_id: str, agent_key: str,
+                             jurisdiction: str = "National",
+                             tighten: Optional[bool] = None) -> Dict[str, float]:
+    """L^(s) (Section 4.6): limits a scenario tightens. Two sources:
+    (1) the optional registry column 'Limit Overrides', entries such as
+        'Current Weekly Hospitalization Rate (per 100k) = P75; ...';
+    (2) the tightening switch (session key 'scenario_limit_tightening',
+        default off): every emphasized live criterion of the scenario is
+        tightened to the upper quartile of its own history.
+    Quantiles come from live_subcriteria.historical_stats."""
+    from modules import live_subcriteria as ls
+    crits = AGENTS[agent_key]["criteria"]
+    try:
+        stats = ls.historical_stats(jurisdiction)
+    except Exception:
+        stats = {}
+    out: Dict[str, float] = {}
+    reg = get_registry().set_index("Scenario ID")
+    if "Limit Overrides" in reg.columns and scenario_id in reg.index:
+        raw = str(reg.at[scenario_id, "Limit Overrides"])
+        for part in raw.split(";"):
+            if "=" not in part:
+                continue
+            name, q = [x.strip() for x in part.split("=", 1)]
+            key = {"P25": "p25", "P50": "p50", "P75": "p75"}.get(q.upper())
+            if name in crits and key and name in stats:
+                out[name] = stats[name][key]
+    if tighten is None:
+        tighten = bool(st.session_state.get("scenario_limit_tightening", False))
+    if tighten:
+        kws = emphasis_keywords(scenario_id)
+        subs = [x for k in kws for x in EMPHASIS_ALIASES.get(k, [k])]
+        for c in ls.criteria_for(agent_key):
+            if c in stats and any(x in c.lower() for x in subs) and c not in out:
+                out[c] = stats[c]["p75"]
+    return out
 
 
 def run_scenario(agent_key: str, scenario_id: Optional[str],
@@ -280,8 +322,14 @@ def run_scenario(agent_key: str, scenario_id: Optional[str],
         from modules.evidence_gate import overlay_for
         ov = tuple(sorted(overlay_for(agent_key,
                                       AGENTS[agent_key]["criteria"]).items()))
+    from modules import weight_manager as _wm
+    limits, _ = _wm.get_expert_limits(agent_key)
+    limits = dict(limits)
+    if scenario_id is not None:
+        limits.update(scenario_limit_overrides(scenario_id, agent_key, jurisdiction))
     res = _scenario_run(agent_key, scenario_id, jurisdiction, mode,
-                        tuple(sorted(w.items())), use_ov, ov)
+                        tuple(sorted(w.items())), use_ov, ov,
+                        tuple(sorted(limits.items())))
     return res, prov
 
 

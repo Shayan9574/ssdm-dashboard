@@ -22,6 +22,7 @@ import streamlit as st
 from modules.mosdm_core import run_mosdm, MOSDMResult, POSITIVE, NEGATIVE
 from modules import weight_manager as wm
 from modules.agent_m_data import get_active_decision_matrix
+from modules import live_subcriteria as ls
 from modules.live_connectors import (
     get_hospital_admission_trends, get_meningitis_trends,
     get_test_positivity_trends, get_ed_visit_trends,
@@ -57,8 +58,8 @@ AGENTS: Dict[str, dict] = {
     "A1": {
         "title": "Agent 1: Epidemiological Burden & Severity",
         "space": "Cost space: larger burden values mean higher priority.",
-        "profile": lambda wide, jur: agent1_epidemiology.build_agent1_profile(wide),
-        "criteria": _crit(agent1_epidemiology.SUBCRITERIA),
+        "profile": lambda wide, jur: ls.attach("A1", agent1_epidemiology.build_agent1_profile(wide), jur),
+        "criteria": _crit(agent1_epidemiology.SUBCRITERIA) + ls.criteria_for("A1"),
         "directions": _dir(agent1_epidemiology.SUBCRITERIA, {"cost": POSITIVE}),
         "charts": [
             ("Weekly Respiratory Admissions (per 100k)", get_hospital_admission_trends, True),
@@ -68,8 +69,8 @@ AGENTS: Dict[str, dict] = {
     "A2": {
         "title": "Agent 2: Transmission & Susceptibility",
         "space": "Hybrid: seroprevalence protects (negative direction); all other criteria positive.",
-        "profile": lambda wide, jur: agent2_transmission.build_agent2_profile(wide),
-        "criteria": _crit(agent2_transmission.SUBCRITERIA),
+        "profile": lambda wide, jur: ls.attach("A2", agent2_transmission.build_agent2_profile(wide), jur),
+        "criteria": _crit(agent2_transmission.SUBCRITERIA) + ls.criteria_for("A2"),
         "directions": _dir(agent2_transmission.SUBCRITERIA,
                            {"cost": POSITIVE, "benefit": NEGATIVE}),
         "charts": [("Laboratory PCR Test Positivity (%)",
@@ -78,8 +79,8 @@ AGENTS: Dict[str, dict] = {
     "A3": {
         "title": "Agent 3: Healthcare System Impact & Facility Strain",
         "space": "Cost space: longer stays and higher emergency volume mean higher priority.",
-        "profile": lambda wide, jur: agent3_healthcare_impact.build_agent3_profile(wide),
-        "criteria": _crit(agent3_healthcare_impact.SUBCRITERIA),
+        "profile": lambda wide, jur: ls.attach("A3", agent3_healthcare_impact.build_agent3_profile(wide), jur),
+        "criteria": _crit(agent3_healthcare_impact.SUBCRITERIA) + ls.criteria_for("A3"),
         "directions": _dir(agent3_healthcare_impact.SUBCRITERIA, {"cost": POSITIVE}),
         "charts": [
             ("Weekly ED Syndromic Visit Share (%)", get_ed_visit_trends, True),
@@ -106,8 +107,8 @@ AGENTS: Dict[str, dict] = {
     "A6": {
         "title": "Agent 6: Equity & Vulnerable Populations",
         "space": "Cost space: higher burden on children, seniors, and high disparity groups means higher priority.",
-        "profile": lambda wide, jur: agent6_equity.build_agent6_profile(wide),
-        "criteria": _crit(agent6_equity.SUBCRITERIA),
+        "profile": lambda wide, jur: ls.attach("A6", agent6_equity.build_agent6_profile(wide), jur),
+        "criteria": _crit(agent6_equity.SUBCRITERIA) + ls.criteria_for("A6"),
         "directions": _dir(agent6_equity.SUBCRITERIA, {"cost": POSITIVE}),
         "charts": [],
     },
@@ -137,6 +138,29 @@ AGENTS: Dict[str, dict] = {
 }
 
 
+for _k in ("A1", "A2", "A3", "A6"):
+    for _c in ls.criteria_for(_k):
+        AGENTS[_k]["directions"][_c] = POSITIVE
+AGENTS["A8"]["space"] = ("Cost space: higher annual direct medical cost means higher priority. "
+                         "The curated SVI column holds a categorical driver, not a multiplier, "
+                         "so cost is the single numeric criterion until SVI values are curated.")
+
+
+def active_criteria(profile: pd.DataFrame, agent_key: str) -> List[str]:
+    """Coverage rule of the readiness stage (Section 4.4)."""
+    return ls.active_criteria(profile, AGENTS[agent_key]["criteria"])
+
+
+def historical_limits_for(criteria: List[str], jurisdiction: str) -> Dict[str, float]:
+    """Historical level of the limits hierarchy: the median of each live
+    criterion's own history to the current completed week."""
+    try:
+        st_ = ls.historical_stats(jurisdiction)
+    except Exception:
+        return {}
+    return {c: st_[c]["p50"] for c in criteria if c in st_}
+
+
 def median_limits_for(profile: pd.DataFrame, criteria: List[str]) -> Dict[str, float]:
     sub = profile.set_index("Disease Type")[criteria].apply(
         pd.to_numeric, errors="coerce")
@@ -159,10 +183,12 @@ def _cached_run(agent_key: str, jurisdiction: str,
             m = profile["Disease Type"].astype(str) == dis
             if m.any() and crit in profile.columns:
                 profile.loc[m, crit] = v
+    act = active_criteria(profile, agent_key)
     return run_mosdm(
-        profile, cfg["criteria"], cfg["directions"],
+        profile, act, cfg["directions"],
         weights=dict(weights_items) or None,
         expert_limits=dict(limits_items) or None,
+        historical_limits=historical_limits_for(act, jurisdiction),
         attainment_mode=attainment_mode,
         alternative_col="Disease Type",
     )
@@ -178,7 +204,7 @@ def run_agent(agent_key: str, jurisdiction: str,
     profile = cfg["profile"](wide, jurisdiction)
     profile = profile[profile["Disease Type"].isin(selected)]
 
-    weights, wprov = wm.get_weights(agent_key, cfg["criteria"])
+    weights, wprov = wm.get_weights(agent_key, active_criteria(profile, agent_key))
     limits, lprov = wm.get_expert_limits(agent_key)
     mode = st.session_state.get("attainment_mode", "graded_calibrated")
     use_ov = bool(st.session_state.get("use_evidence_overlay", True))

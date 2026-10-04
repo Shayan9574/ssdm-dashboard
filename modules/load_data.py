@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 import pandas as pd
 from modules.data_cache import read_excel_sheet
@@ -15,6 +16,39 @@ def get_data_filepath() -> Path:
         if p.exists():
             return p
     return DATA_PATHS[0]
+
+_PLAIN_NUMBER = re.compile(r"^[-+]?\d*\.?\d+$")
+HARMONIZATION_LOG: list = []
+
+
+def harmonization_log() -> pd.DataFrame:
+    """Cells converted from stored fractions to percent points by load_wide."""
+    if not HARMONIZATION_LOG:
+        try:
+            load_wide()
+        except Exception:
+            pass
+    return pd.DataFrame(HARMONIZATION_LOG)
+
+
+PERCENT_COLUMNS: list = []
+
+
+def percent_unit_violations(df: pd.DataFrame = None) -> pd.DataFrame:
+    """Readiness guard: after harmonization every percent cell must parse to a
+    value in [0, 100]; anything else signals a unit or entry error."""
+    from modules.utils_numeric import parse_numeric
+    df = load_wide() if df is None else df
+    rows = []
+    for col in PERCENT_COLUMNS:
+        if col not in df.columns:
+            continue
+        for i in df.index:
+            x = parse_numeric(df.at[i, col])
+            if x == x and not (0.0 <= x <= 100.0):
+                rows.append({"Disease": df.at[i, "Disease Type"], "Column": col, "Value": x})
+    return pd.DataFrame(rows)
+
 
 @st.cache_data(ttl=21600)
 def load_wide(file_path: str = None) -> pd.DataFrame:
@@ -72,6 +106,35 @@ def load_wide(file_path: str = None) -> pd.DataFrame:
 
     valid_cols = [c for c in df.columns if not c.startswith("_drop_")]
     df_clean = df[valid_cols].reset_index(drop=True)
+
+    # Unit harmonization (Section 3): percent columns in the curated sheet mix
+    # Excel percent cells, stored as plain fractions (0.123 = 12.3%), with
+    # text percents ("4% - 14%"), which the parser reads as percent points.
+    # A plain number at or below one in a percent column is therefore a
+    # fraction and is converted to percent points; text with a % sign and
+    # plain numbers above one are already percent points. Every conversion
+    # is logged (harmonization_log) so the audit trail shows it.
+    pct_cols = [col_names[i] for i, raw_h in enumerate(str(h) for h in raw.iloc[1].tolist())
+                if "%" in raw_h and col_names[i] in df_clean.columns]
+    log = []
+    for col in pct_cols:
+        for i in df_clean.index:
+            v = df_clean.at[i, col]
+            if v is None or (isinstance(v, float) and pd.isna(v)):
+                continue
+            txt = str(v).strip()
+            if _PLAIN_NUMBER.match(txt):
+                x = float(txt)
+                if x <= 1.0:
+                    new_v = round(x * 100.0, 6)
+                    df_clean.at[i, col] = new_v
+                    log.append({"Disease": df_clean.at[i, "Disease Type"],
+                                "Column": col, "Stored": x,
+                                "Harmonized (percent points)": new_v})
+    HARMONIZATION_LOG[:] = log
+    PERCENT_COLUMNS[:] = pct_cols
+    df_clean.attrs["harmonization_log"] = log
+    df_clean.attrs["percent_columns"] = pct_cols
 
     for col in df_clean.columns:
         if df_clean[col].dtype == object:

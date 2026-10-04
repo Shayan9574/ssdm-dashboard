@@ -12,6 +12,7 @@ ui.apply_theme()
 for k, v in {"g_lam": 0.7, "g_alpha": 1.0, "g_beta": 1.0, "g_gamma": 1.0,
              "g_theta": 0.7, "attainment_mode": "graded_calibrated",
              "use_evidence_overlay": True,
+             "scenario_limit_tightening": False,
              "g_model": "gemini-2.5-flash"}.items():
     st.session_state.setdefault(k, v)
 
@@ -34,11 +35,18 @@ with st.sidebar:
         "Elicitation Studio",
         "Methods & About",
     ], label_visibility="collapsed")
+    st.toggle("Scenario limit tightening", key="scenario_limit_tightening",
+              help="Section 4.6: under each scenario, its emphasized live "
+                   "subcriteria use the upper quartile of their own history "
+                   "as the acceptable limit. Off by default.")
     st.divider()
     st.caption("Second generation MOSDM engine; every result carries its "
                "audit trail. Weekly CDC feeds, launch time freshness.")
 
 from modules import pages_e
+from modules import readiness
+
+readiness.render_gate(jurisdiction, page)
 
 if page == "Overview":
     render_status_banner()
