@@ -40,6 +40,7 @@ import pandas as pd
 import requests
 import streamlit as st
 
+from pathlib import Path
 from modules.load_data import get_data_filepath
 from modules.utils_numeric import parse_numeric
 from modules import genai
@@ -48,7 +49,9 @@ LEDGER_SHEET = "Evidence Ledger"          # legacy name, no longer written
 def _ledger_path():
     """The ledger lives in its own small file beside the master workbook,
     so the live app never rewrites the large master (Drive safe, atomic)."""
-    return get_data_filepath().parent / "evidence_ledger.csv"
+    # resolve() follows the Colab symlink so the ledger lands on Drive, beside
+    # the real master, and survives runtime resets.
+    return Path(get_data_filepath()).resolve().parent / "evidence_ledger.csv"
 TOLERANCE = 0.25
 TRUSTED_PATTERNS = [
     r"\.gov(/|$)", r"who\.int", r"ncbi\.nlm\.nih\.gov", r"pubmed",
