@@ -22,8 +22,8 @@ from modules.agent_engine import AGENTS, CORE4, run_agent, median_limits_for
 from modules.load_data import load_citations, load_derivations
 
 ENGINE_BADGE = "Engine: second generation MOSDM (graded attainment, tolerance tiers, dominance guard)"
-MODES = {"graded_calibrated": "Graded, discrimination calibrated anchors (default)",
-         "graded_fixed": "Graded, fixed anchor theta = 0.5",
+MODES = {"graded_fixed": "Graded, fixed anchor theta = 0.3 (selected default)",
+         "graded_calibrated": "Graded, discrimination calibrated anchors",
          "binary": "Binary attainment (first generation, ablation)"}
 
 

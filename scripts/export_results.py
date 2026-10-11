@@ -27,7 +27,7 @@ import pandas as pd  # noqa: E402
 # Default configuration (mirrors the dashboard defaults)
 JUR = "National"
 LAM, ALPHA, BETA, GAMMA = 0.7, 1.0, 1.0, 1.0
-MODE = "graded_calibrated"
+MODE = "graded_fixed"   # selected baseline: fixed anchor 0.3, tightening on
 THETA = 0.7
 N_DRAWS, CONC, SEED = 500, 60.0, 7
 

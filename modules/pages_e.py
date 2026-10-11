@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+from modules.mosdm_core import DEFAULT_MODE
 
 from modules import ui
 from modules import scenario_engine as se
@@ -30,7 +31,7 @@ def _params():
             st.session_state.get("g_alpha", 1.0),
             st.session_state.get("g_beta", 1.0),
             st.session_state.get("g_gamma", 1.0),
-            st.session_state.get("attainment_mode", "graded_calibrated"))
+            st.session_state.get("attainment_mode", DEFAULT_MODE))
 
 
 def _strip(jurisdiction):

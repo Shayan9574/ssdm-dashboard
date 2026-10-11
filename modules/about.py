@@ -11,11 +11,13 @@ def render():
     # --- 1. EXECUTIVE SUMMARY & PURPOSE ---
     st.markdown("**1. System Overview & Core Purpose**")
     st.markdown(
-        "Standard public health prioritization often suffers from **premature score flattening**—collapsing "
-        "diverse epidemiological dimensions (such as high annual incidence versus low-incidence, high-lethality threats) "
-        "into an arbitrary single weighted average. The **SSDM Public Health Dashboard** resolves this by pairing "
-        "**Multi-Objective Spatial Decision Making (MOSDM)** Pareto dominance tiering with **Scenario-Based Spatial "
-        "Decision Making (SSDM)** dynamic tie-breaking."
+        "Standard public health prioritization often collapses diverse epidemiological dimensions "
+        "(high annual incidence versus low incidence, high lethality threats) into a single weighted average too early. "
+        "The **SSDM Public Health Dashboard** keeps those dimensions apart: eight domain agents each stratify the "
+        "pathogens with a **second generation MOSDM core** (graded attainment against criterion limits, tolerance "
+        "tiers and a dominance guard), a **scenario layer (SSDM)** re-runs every agent under nine registered "
+        "scenarios weighted by probability, and an integration layer combines the agents without ever letting the "
+        "AI assistant alter a computed value."
     )
 
     # --- 2. TWO-LAYER ARCHITECTURE ---
@@ -41,26 +43,33 @@ def render():
     # --- 3. MATHEMATICAL DECISION SCIENCE ---
     st.markdown("**3. Mathematical Formulations & Decision Science**")
     
-    with st.expander("📐 Multi-Objective Spatial Decision Making (MOSDM) — Pareto Dominance Tiering", expanded=True):
+    with st.expander("📐 MOSDM core: graded attainment and tolerance tiers", expanded=True):
         st.markdown(
-            "In multi-objective optimization, pathogen alternative $A$ **dominates** pathogen $B$ in Cost Space if "
-            "$A$ exhibits greater or equal burden across all criteria, and is strictly worse in at least one:\n\n"
-            "$$\\forall k \\in \\{1, \\dots, m\\}, \\quad f_k(A) \\ge f_k(B) \\quad \\land \\quad \\exists k : f_k(A) > f_k(B)$$\n\n"
-            "* **Tier 1 (Pareto Frontier):** The set of non-dominated pathogens. No single pathogen overshadows them across all dimensions.\n"
-            "* **Iterative Peeling:** Once Tier 1 is isolated, it is removed from the candidate pool. Non-dominated alternatives among the remaining pathogens form Tier 2, repeating until all diseases are classified.\n"
-            "* **Optimization Spaces:**\n"
-            "  * **Cost Space (Agents 1, 3, 6, 7, 8):** Higher values represent greater risk/burden.\n"
-            "  * **Benefit Space (Agent 5):** Higher values represent superior prevention capacity ($A \\ge B$ is preferred).\n"
-            "  * **Inverted Cost Space (Agent 4):** Shorter clinical windows are inverted ($-x$) so higher transformed values represent greater clinical urgency."
+            "Every criterion is oriented so that larger means more urgent (cost space; benefit criteria and the "
+            "clinical time windows are inverted). Each value is converted to a **graded attainment** "
+            "$\\tilde a_{ij} \\in [0,1]$ against the criterion limits, which come from expert limits when "
+            "elicited, otherwise from historical surveillance quantiles, otherwise from the pool median. "
+            "The selected default uses a fixed anchor $\\theta = 0.3$ (selected by a preregistered baseline study).\n\n"
+            "$$K_i = \\sum_j w_j\\,\\tilde a_{ij}, \\qquad \\delta = \\min_{j:\\,w_j>0} w_j$$\n\n"
+            "* **Tiering:** the pathogen with the largest weighted attainment $K_{\\max}$ enters Tier 1 together "
+            "with every pathogen within the tolerance $\\delta$ of it; the tier is removed and the step repeats.\n"
+            "* **Dominance guard:** a pathogen that is dominated on all shared observed criteria cannot be placed "
+            "above the pathogen that dominates it.\n"
+            "* **Separation:** the attainment margin between the weakest member of a tier and the strongest "
+            "remaining pathogen, reported as a measure of how firm each tier boundary is."
         )
 
-    with st.expander("⚖️ Scenario-Based Spatial Decision Making (SSDM) — Dynamic Tie-Breaking", expanded=False):
+    with st.expander("⚖️ SSDM scenario layer and integration", expanded=False):
         st.markdown(
-            "Within any given Pareto tier, pathogens cannot be distinguished by strict dominance alone. "
-            "The system uses **SSDM linear weighted summation** across min-max normalized criteria to break intra-tier ties:\n\n"
-            "$$\\bar{x}_{i,k} = \\frac{x_{i,k} - \\min(x_k)}{\\max(x_k) - \\min(x_k)}, \\qquad S_i = \\sum_{k=1}^m w_k \\bar{x}_{i,k}$$\n\n"
-            "* **Scenario Weights ($w_k$):** Dynamic policy weights calibrated to 12 operational public health emergencies (e.g., *Winter Respiratory Surge*, *AMR Crisis*, *Vaccine Supply Shortage*).\n"
-            "* **Final Hierarchy:** Pathogens are sorted primarily by **Pareto Tier** ($1 \\rightarrow 2 \\rightarrow 3$) and secondarily by **Weighted Score** ($S_i$)."
+            "* **Scenarios:** nine registered scenarios (S1 to S9) plus the steady state ST1. Each scenario "
+            "emphasizes criteria (weight multiplied by three on the elicited base) and, by default, tightens the "
+            "limits of emphasized live criteria to the historical 75th percentile.\n"
+            "* **Scenario probability:** $\\pi_s \\propto f_s^{\\alpha} s_s^{\\beta} h_s^{\\gamma}$ from "
+            "frequency, severity and impact ratings; expert ratings blend with AI ratings through $\\lambda$.\n"
+            "* **Indicators:** probability weighted robustness $R$, expected tier $\\Phi$, dispersion "
+            "$\\sigma$ and stability index $SI$ place each pathogen in a decision quadrant.\n"
+            "* **Integration:** agent results are combined across agents with agent weights and a second order "
+            "MOSDM pass; an evidence gate withholds criteria that fail readiness checks."
         )
 
     # --- 4. DOMAIN AGENT REFERENCE TABLE ---
@@ -91,6 +100,7 @@ def render():
         {"Surveillance Feed": "Viral Test Positivity", "Endpoint ID": "seuz-s2cv", "Network / Source": "CDC NREVSS", "Target Pathogens": "COVID-19, Influenza, RSV"},
         {"Surveillance Feed": "SARS-CoV-2 Wastewater Load", "Endpoint ID": "j9g8-acpt", "Network / Source": "CDC NWSS", "Target Pathogens": "SARS-CoV-2"},
         {"Surveillance Feed": "Epidemic Trends & Rt Velocity", "Endpoint ID": "5dqz-y4ea", "Network / Source": "CDC CFA", "Target Pathogens": "COVID-19, Influenza, RSV"},
+        {"Surveillance Feed": "RESP-NET Hospitalization Rates", "Endpoint ID": "kvib-3txy", "Network / Source": "CDC RESP-NET", "Target Pathogens": "COVID-19, Influenza, RSV"},
         {"Surveillance Feed": "Weekly Notifiable Diseases (NNDSS)", "Endpoint ID": "x9gk-5huc", "Network / Source": "CDC NNDSS", "Target Pathogens": "Meningococcal Disease"}
     ]
     st.dataframe(pd.DataFrame(feed_data), width="stretch", hide_index=True)

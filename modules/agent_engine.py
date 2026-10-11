@@ -18,6 +18,7 @@ reconciled at the cross agent integration stage, not here.
 from typing import Callable, Dict, List
 import pandas as pd
 import streamlit as st
+from modules.mosdm_core import DEFAULT_MODE
 
 from modules.mosdm_core import run_mosdm, MOSDMResult, POSITIVE, NEGATIVE
 from modules import weight_manager as wm
@@ -206,7 +207,7 @@ def run_agent(agent_key: str, jurisdiction: str,
 
     weights, wprov = wm.get_weights(agent_key, active_criteria(profile, agent_key))
     limits, lprov = wm.get_expert_limits(agent_key)
-    mode = st.session_state.get("attainment_mode", "graded_calibrated")
+    mode = st.session_state.get("attainment_mode", DEFAULT_MODE)
     use_ov = bool(st.session_state.get("use_evidence_overlay", True))
     ov = ()
     if use_ov:

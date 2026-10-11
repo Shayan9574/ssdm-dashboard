@@ -10,9 +10,9 @@ ui.apply_theme()
 
 # global parameters, shared by every page
 for k, v in {"g_lam": 0.7, "g_alpha": 1.0, "g_beta": 1.0, "g_gamma": 1.0,
-             "g_theta": 0.7, "attainment_mode": "graded_calibrated",
+             "g_theta": 0.7, "attainment_mode": "graded_fixed",
              "use_evidence_overlay": True,
-             "scenario_limit_tightening": False,
+             "scenario_limit_tightening": True,
              "g_model": "gemini-2.5-flash"}.items():
     st.session_state.setdefault(k, v)
 
@@ -38,7 +38,7 @@ with st.sidebar:
     st.toggle("Scenario limit tightening", key="scenario_limit_tightening",
               help="Section 4.6: under each scenario, its emphasized live "
                    "subcriteria use the upper quartile of their own history "
-                   "as the acceptable limit. Off by default.")
+                   "as the acceptable limit. On by default (selected baseline).")
     st.divider()
     st.caption("Second generation MOSDM engine; every result carries its "
                "audit trail. Weekly CDC feeds, launch time freshness.")

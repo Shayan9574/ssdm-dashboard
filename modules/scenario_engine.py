@@ -31,6 +31,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 import streamlit as st
+from modules.mosdm_core import DEFAULT_MODE
 
 from modules.load_data import load_scenario_registry
 from modules.weight_manager import INTENSITY_SCALE, gmir, get_entry, set_entry
@@ -116,12 +117,24 @@ def scenario_weights(scenario_id: str, agent_key: str) -> Tuple[Dict[str, float]
         return {c: v / t for c, v in w.items()}, e["provenance"]
     kws = emphasis_keywords(scenario_id)
     subs = [s for k in kws for s in EMPHASIS_ALIASES.get(k, [k])]
+    # Section 4.6: emphasized criteria receive three times their BASE weight.
+    # The base is the agent's elicited baseline profile when one covers the
+    # criteria, otherwise equal weights (fix G2: previously the rule ignored
+    # elicited base weights, so elicitation never reached the scenario runs).
+    from modules import weight_manager as _wm
+    e_base = _wm.get_entry("criterion", agent_key)
+    base = {c: float(e_base["values"].get(c, 0.0)) for c in criteria} if e_base else {}
+    if not base or sum(base.values()) <= 0:
+        base = {c: 1.0 for c in criteria}
     w = {}
     for c in criteria:
         cl = c.lower()
-        w[c] = 3.0 if any(s in cl for s in subs) else 1.0
+        w[c] = base[c] * (3.0 if any(s in cl for s in subs) else 1.0)
     t = sum(w.values())
-    return {c: v / t for c, v in w.items()}, "emphasis default"
+    if t <= 0:
+        return {c: 1.0 / len(criteria) for c in criteria}, "emphasis default"
+    prov = "emphasis default on elicited base" if e_base else "emphasis default"
+    return {c: v / t for c, v in w.items()}, prov
 
 
 # ----------------------------------------------------------------------
@@ -297,7 +310,8 @@ def scenario_limit_overrides(scenario_id: str, agent_key: str,
             if name in crits and key and name in stats:
                 out[name] = stats[name][key]
     if tighten is None:
-        tighten = bool(st.session_state.get("scenario_limit_tightening", False))
+        from modules.mosdm_core import DEFAULT_TIGHTENING
+        tighten = bool(st.session_state.get("scenario_limit_tightening", DEFAULT_TIGHTENING))
     if tighten:
         kws = emphasis_keywords(scenario_id)
         subs = [x for k in kws for x in EMPHASIS_ALIASES.get(k, [k])]
@@ -310,7 +324,7 @@ def scenario_limit_overrides(scenario_id: str, agent_key: str,
 def run_scenario(agent_key: str, scenario_id: Optional[str],
                  jurisdiction: str = "National") -> Tuple[MOSDMResult, str]:
     """scenario_id None -> baseline run with the agent's elicited weights."""
-    mode = st.session_state.get("attainment_mode", "graded_calibrated")
+    mode = st.session_state.get("attainment_mode", DEFAULT_MODE)
     if scenario_id is None:
         from modules import weight_manager as wm
         w, prov = wm.get_weights(agent_key, AGENTS[agent_key]["criteria"])

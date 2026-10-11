@@ -10,6 +10,7 @@ MOSDM on expected and baseline matrices in parallel, the AI synthesis
 
 import pandas as pd
 import streamlit as st
+from modules.mosdm_core import DEFAULT_MODE
 
 from modules import ssdm_core as sc
 from modules import scenario_engine as se
@@ -23,7 +24,7 @@ def render(jurisdiction: str = "National") -> None:
               help="Sections 14 to 19: probability weighted indicators, "
                    "quadrant classes, the second order matrix, the cross "
                    "agent run, and the final synthesis.")
-    mode = st.session_state.get("attainment_mode", "graded_calibrated")
+    mode = st.session_state.get("attainment_mode", DEFAULT_MODE)
     c1, c2, c3, c4, c5 = st.columns(5)
     lam = c1.slider("lambda", 0.0, 1.0, step=0.05, key="g_lam")
     alpha = c2.slider("alpha", 0.0, 2.0, step=0.1, key="g_alpha")

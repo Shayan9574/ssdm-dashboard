@@ -93,6 +93,15 @@ class MOSDMResult:
 # core steps
 # ----------------------------------------------------------------------
 
+TOL_EPS = 1e-9
+# Defaults selected by the pre-registered, outcome blind baseline selection
+# (paper Section 7.1): graded attainment with fixed anchor 0.3, dominance guard
+# on, scenario limit tightening on. Every alternative remains selectable.
+DEFAULT_MODE = "graded_fixed"
+DEFAULT_THETA = 0.3
+DEFAULT_TIGHTENING = True
+
+
 def _normalize_weights(weights: Dict[str, float], criteria: List[str]) -> Dict[str, float]:
     w = {c: float(weights.get(c, 0.0)) for c in criteria}
     total = sum(w.values())
@@ -211,8 +220,8 @@ def run_mosdm(
     weights: Optional[Dict[str, float]] = None,
     expert_limits: Optional[Dict[str, float]] = None,
     historical_limits: Optional[Dict[str, float]] = None,
-    attainment_mode: str = "graded_calibrated",
-    theta_fixed: float = 0.5,
+    attainment_mode: str = "graded_fixed",
+    theta_fixed: float = 0.3,
     theta_bounds: Tuple[float, float] = (0.3, 0.7),
     dominance_guard: bool = True,
     guard_min_shared: int = 1,
@@ -260,6 +269,7 @@ def run_mosdm(
     iterations: List[IterationRecord] = []
     tier_last_scores: Dict[int, float] = {}
     tier_first_scores: Dict[int, float] = {}
+    attain_margin: Dict[int, float] = {}
 
     pool = list(alts)
     tier_no = 0
@@ -320,9 +330,15 @@ def run_mosdm(
 
         # -- 9.5 tier by tolerance ------------------------------------
         active = [c for c in criteria if X.loc[pool, c].notna().any()]
-        delta = min((w[c] for c in active), default=1.0 / max(len(criteria), 1))
+        # zero weights are excluded from the tolerance (a criterion a decision
+        # maker switched off cannot define resolvability); fix G1
+        delta = min((w[c] for c in active if w[c] > 0), default=1.0 / max(len(criteria), 1))
         k_max = max(k_w.values())
-        candidate = [a for a in pool if (k_max - k_w[a]) < delta]
+        # strict tolerance with a fixed numerical guard: a gap equal to delta
+        # (up to floating point noise) always separates, so tier membership at
+        # the exact boundary never depends on summation order (Checkpoint F2).
+        candidate = [a for a in pool
+                     if (k_max - k_w[a]) < delta - TOL_EPS or (k_max - k_w[a]) <= TOL_EPS]
 
         # -- oriented normalization over the pool ---------------------
         norm, flat = _oriented_minmax(X, pool, criteria, directions)
@@ -359,6 +375,10 @@ def run_mosdm(
         targets[tier_no] = target
         tier_first_scores[tier_no] = t_scores[ordered[0]]
         tier_last_scores[tier_no] = t_scores[ordered[-1]]
+        rest = [a for a in pool if a not in tier_members]
+        if rest:   # attainment margin of tier t over the best remaining disease
+            attain_margin[tier_no] = round(min(k_w[a] for a in tier_members)
+                                           - max(k_w[a] for a in rest), 4)
 
         iterations.append(IterationRecord(
             iteration=tier_no, pool=list(pool), limits=limits,
@@ -372,8 +392,13 @@ def run_mosdm(
         pool = [a for a in pool if a not in tier_members]
 
     # separation: last score of tier t versus first score of tier t + 1
-    separations = {t: round(tier_first_scores[t + 1] - tier_last_scores[t], 4)
-                   for t in range(1, tier_no) if (t + 1) in tier_first_scores}
+    # (fix G3) The former definition, first distance of tier t + 1 minus last
+    # distance of tier t, compared distances to DIFFERENT targets and was zero
+    # or negative by construction. Separation is now the weighted attainment
+    # margin at the iteration that formed tier t: the lowest k_w inside the
+    # tier minus the highest k_w left in the pool (negative only when the
+    # dominance guard demoted a member above a remaining disease).
+    separations = dict(attain_margin)
 
     order = sorted(alts, key=lambda a: (tiers[a], scores[a], a))
 
