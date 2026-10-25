@@ -1,114 +1,103 @@
 """
 ssdm_view.py
 
-The SSDM Integration & Outputs page (Sections 14 to 19): per agent
-indicators and quadrant classification, the second order matrix with
-agent level weight elicitation, the cross agent second generation
-MOSDM on expected and baseline matrices in parallel, the AI synthesis
-(clearly labeled, never altering results), and downloads.
+SSDM Integration page: indicators and typology per agent, the perspective
+weights W_g, the second order matrices (expected and baseline), the final
+stratifications side by side, an AI written synthesis that never alters a
+number, and the downloads with the run manifest.
 """
 
-import pandas as pd
-import streamlit as st
-from modules.mosdm_core import DEFAULT_MODE
+import json
 
+import streamlit as st
+
+from modules import state, controls, genai, ui
 from modules import ssdm_core as sc
 from modules import scenario_engine as se
 from modules import weight_manager as wm
 from modules.agent_engine import AGENTS
-from modules import genai
+
+
+def run_manifest(jurisdiction: str) -> dict:
+    from modules import feeds, live_subcriteria as ls
+    import subprocess
+    try:
+        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True,
+                                text=True, cwd=str(feeds.ROOT)).stdout.strip()
+    except Exception:
+        commit = ""
+    ref = ls.reference_week(jurisdiction)
+    return {"jurisdiction": jurisdiction, "reference_week": str(ref)[:10] if ref is not None else "",
+            "settings": state.settings(), "context_key": state.context_key(),
+            "code_commit": commit or "unknown", "feeds": feeds.data_status().to_dict("records"),
+            "inputs_store": state.backend().name}
 
 
 def render(jurisdiction: str = "National") -> None:
-    st.header("SSDM Integration & Outputs",
-              help="Sections 14 to 19: probability weighted indicators, "
-                   "quadrant classes, the second order matrix, the cross "
-                   "agent run, and the final synthesis.")
-    mode = st.session_state.get("attainment_mode", DEFAULT_MODE)
-    c1, c2, c3, c4, c5 = st.columns(5)
-    lam = c1.slider("lambda", 0.0, 1.0, step=0.05, key="g_lam")
-    alpha = c2.slider("alpha", 0.0, 2.0, step=0.1, key="g_alpha")
-    beta = c3.slider("beta", 0.0, 2.0, step=0.1, key="g_beta")
-    gamma = c4.slider("gamma", 0.0, 2.0, step=0.1, key="g_gamma")
-    theta = c5.slider("theta (stability cut)", 0.5, 0.9, step=0.05, key="g_theta",
-                      help="High stability when SI is at least theta.")
+    st.header("SSDM Integration & Outputs")
+    controls.param_sliders()
+    lam, alpha, beta, gamma = controls.params()
+    theta = float(state.setting("theta_si"))
 
-    # 1) indicators and quadrants per agent
-    st.subheader("1) Probability Weighted Indicators and Quadrants",
-                 help="R, Phi, sigma, SI over the weighted scenarios; the "
-                      "baseline stays outside as the reference.")
-    agent_key = st.selectbox("Agent", list(AGENTS),
-                             format_func=lambda k: AGENTS[k]["title"],
+    st.subheader("1) Probability weighted indicators and typology")
+    agent_key = st.selectbox("Agent", list(AGENTS), format_func=lambda k: AGENTS[k]["title"],
                              key="ss_agent")
-    with st.spinner("Aggregating over scenarios"):
-        ind = sc.indicators(agent_key, jurisdiction, lam, alpha, beta, gamma, mode)
-        quad = sc.quadrants(ind, theta)
-    st.dataframe(quad, width="stretch", hide_index=True)
-    plot = quad.rename(columns={"R (expected rank)": "R", "SI (stability)": "SI"})
-    st.scatter_chart(plot, x="R", y="SI", color="Quadrant", size=60)
-    st.caption("Left of the rank midline: high priority. Above theta: high "
-               "stability. Structural priority (high, stable), conditionally "
-               "critical (high, unstable), stable low priority, latent risk.")
+    ind = sc.indicators(agent_key, jurisdiction, lam, alpha, beta, gamma)
+    quad = sc.quadrants(ind, theta)
+    st.dataframe(quad.round(4), width="stretch", hide_index=True)
+    st.plotly_chart(ui.quadrant_chart(quad, theta, AGENTS[agent_key]["title"]), width="stretch")
 
-    # 2) agent level weights
-    st.subheader("2) Agent Importance Weights (W_g)",
-                 help="Section 7.2 agent level mode; equal weights default, "
-                      "elicitable through the same four input modes.")
-    with st.expander("Elicit agent level weights"):
-        wm.render_weight_elicitation("agent_level::global",
-                                     "Cross agent integration", list(AGENTS))
+    st.subheader("2) Perspective weights W_g")
+    with st.expander("Elicit perspective weights"):
+        wm.render_weight_elicitation("agent_level::global", "Cross agent integration", list(AGENTS))
     w, wprov = sc.get_agent_weights()
-    st.caption("Active W_g (" + wprov + "): " +
-               ", ".join(f"{sc.AGENT_LABELS[k]} = {v:.3f}" for k, v in w.items()))
+    st.caption(f"Active W_g ({wprov}): " + ", ".join(f"{sc.AGENT_LABELS[k]} = {v:.3f}" for k, v in w.items()))
 
-    # 3) second order matrix and cross agent run
-    st.subheader("3) Second Order Matrix and Cross Agent SSDM",
-                 help="Entries are expected ranks R_i per agent (Agent 5 "
-                      "inverted at integration so lower always means greater "
-                      "concern); the second generation MOSDM runs on this "
-                      "matrix with direction negative.")
-    with st.spinner("Running the cross agent integration"):
-        M_exp, res_exp, _ = sc.cross_agent_run(jurisdiction, lam, alpha,
-                                               beta, gamma, mode, False)
-        M_base, res_base, _ = sc.cross_agent_run(jurisdiction, lam, alpha,
-                                                 beta, gamma, mode, True)
-    st.markdown("**Expected rank matrix (probability weighted)**")
-    st.dataframe(M_exp.round(3), width="stretch")
-    st.markdown("**Final integrated stratification (expected)**")
-    st.dataframe(res_exp.table(), width="stretch", hide_index=True)
-    with st.expander("Parallel run on the baseline rank matrix (reference)"):
-        st.dataframe(M_base.round(3), width="stretch")
+    st.subheader("3) Second order matrices and final stratifications")
+    M_exp, res_exp, _ = sc.cross_agent_run(jurisdiction, lam, alpha, beta, gamma, "", False)
+    M_base, res_base, _ = sc.cross_agent_run(jurisdiction, lam, alpha, beta, gamma, "", True)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("**Expected rank matrix (scenario weighted)**")
+        st.dataframe(M_exp.round(4), width="stretch")
+        st.markdown("**Final stratification (expected)**")
+        st.dataframe(res_exp.table(), width="stretch", hide_index=True)
+    with c2:
+        st.markdown("**Baseline rank matrix (present conditions)**")
+        st.dataframe(M_base.round(4), width="stretch")
+        st.markdown("**Final stratification (baseline)**")
         st.dataframe(res_base.table(), width="stretch", hide_index=True)
-        st.caption("Agreement between the two runs indicates the integrated "
-                   "prioritization is not an artifact of the scenario set.")
+    moved = [d for d in res_exp.order if res_base.tiers.get(d) != res_exp.tiers.get(d)]
+    st.caption("Distinctions due to the scenario layer: " +
+               (", ".join(f"{d} (tier {res_base.tiers.get(d)} at baseline, {res_exp.tiers.get(d)} expected)"
+                          for d in moved) if moved else "none; both matrices give the same tiers.")
+               + " Attainment margins (expected): " +
+               ", ".join(f"tier {t}: {g:.4f}" for t, g in res_exp.separations.items()))
 
-    # 4) synthesis
-    st.subheader("4) Final Synthesis (AI written, results unchanged)")
-    model = st.session_state.get("g_model", "gemini-2.5-flash")
-    st.caption(f"Gemini model: {model} (chosen on the Scenarios page)")
-    if st.button("Generate synthesis", disabled=not genai.gemini_available()):
-        with st.spinner("Writing the synthesis"):
-            quads = {k: sc.quadrants(
-                sc.indicators(k, jurisdiction, lam, alpha, beta, gamma, mode),
-                theta)[["Disease", "Quadrant"]] for k in AGENTS}
-            prob = se.probability_table(lam, alpha, beta, gamma)[
-                ["Scenario ID", "Name", "p_s"]]
+    st.subheader("4) Synthesis for decision makers (AI written, numbers unchanged)")
+    if genai.gemini_available() and state.can_edit():
+        if st.button("Write the synthesis"):
+            quads = {AGENTS[k]["title"]: sc.quadrants(
+                sc.indicators(k, jurisdiction, lam, alpha, beta, gamma), theta)[["Disease", "Quadrant"]]
+                for k in AGENTS}
+            prob = se.probability_table(lam, alpha, beta, gamma)[["Scenario ID", "Name", "p_s"]].round(4)
+            from modules import evidence_gate as eg
+            ext = eg.external_evidence()
+            ext = ext[["disease", "metric", "value", "unit", "source_title"]].head(40) if not ext.empty else ext
             try:
-                text = sc.synthesize(res_exp.table(), quads, prob, model)
-                st.session_state["ss_synth"] = text
-            except Exception as e:
+                st.session_state["ss_synth"] = sc.synthesize(res_exp.table(), quads, prob, ext,
+                                                             state.setting("gemini_model"))
+            except Exception as e:  # noqa: BLE001
                 st.error(f"Synthesis failed: {e}")
     if st.session_state.get("ss_synth"):
         st.markdown(st.session_state["ss_synth"])
-        st.caption("Narrative generated by the AI tier from the computed "
-                   "tables; every number originates in the engine above.")
+        st.caption("Written by the AI assistant from the computed tables; every number comes from the engine.")
 
-    # 5) outputs
     st.subheader("5) Downloads")
-    st.download_button("Final stratification (CSV)",
-                       res_exp.table().to_csv(index=False),
+    d1, d2, d3, d4 = st.columns(4)
+    d1.download_button("Final stratification (CSV)", res_exp.table().to_csv(index=False),
                        "ssdm_final_stratification.csv")
-    st.download_button("Second order matrix (CSV)",
-                       M_exp.to_csv(), "ssdm_second_order_matrix.csv")
-    st.download_button("Indicators, selected agent (CSV)",
-                       quad.to_csv(index=False), "ssdm_indicators.csv")
+    d2.download_button("Second order matrix (CSV)", M_exp.to_csv(), "ssdm_second_order_matrix.csv")
+    d3.download_button("Indicators of this agent (CSV)", quad.to_csv(index=False), "ssdm_indicators.csv")
+    d4.download_button("Run manifest (JSON)", json.dumps(run_manifest(jurisdiction), indent=1, default=str),
+                       "ssdm_run_manifest.json")

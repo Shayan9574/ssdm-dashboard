@@ -34,7 +34,7 @@ def read_excel_sheet(path, sheet_name=0, **kwargs) -> pd.DataFrame:
     arguments. Falls back to a direct Excel read on any cache trouble."""
     p = Path(path)
     try:
-        mtime = int(p.stat().st_mtime)
+        mtime = f"{p.stat().st_mtime_ns}:{p.stat().st_size}"
         key = hashlib.md5(
             f"{p}|{sheet_name}|{sorted(kwargs.items())}|{mtime}".encode()
         ).hexdigest()[:20]

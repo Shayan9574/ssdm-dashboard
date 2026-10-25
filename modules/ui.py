@@ -99,13 +99,14 @@ def _base_layout(fig, height=330):
 
 
 def quadrant_chart(quad: pd.DataFrame, theta: float, title=""):
+    quad = quad.dropna(subset=["R (expected rank)"])
     n_a = len(quad)
     cut = (n_a + 1) / 2.0
     fig = go.Figure()
     fig.add_vline(x=cut, line=dict(color=C["line"], dash="dash"))
     fig.add_hline(y=theta, line=dict(color=C["line"], dash="dash"))
     for _, r in quad.iterrows():
-        col = QUADRANT_COLORS[r["Quadrant"]]
+        col = QUADRANT_COLORS.get(r["Quadrant"], C["slate"])
         fig.add_trace(go.Scatter(
             x=[r["R (expected rank)"]], y=[r["SI (stability)"]],
             mode="markers+text", text=[SHORT.get(r["Disease"], r["Disease"])],
@@ -128,7 +129,7 @@ def prob_bars(prob: pd.DataFrame):
         x=d["p_s"], y=d["Scenario ID"] + "  " + d["Name"].str.slice(0, 28),
         orientation="h", marker_color=C["teal"],
         hovertemplate="p = %{x:.4f}<extra></extra>"))
-    fig.update_xaxes(title="Normalized probability p_s")
+    fig.update_xaxes(title="Scenario weight p_s")
     return _base_layout(fig, height=300)
 
 

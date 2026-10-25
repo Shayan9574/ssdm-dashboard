@@ -17,3 +17,11 @@ pipeline_status.json
 
 # OS
 .DS_Store
+
+# Local caches and run outputs
+.cache/
+data/feeds/
+data/derived/
+data/ssdm_inputs.json
+data/ssdm_inputs_log.jsonl
+*.tmp

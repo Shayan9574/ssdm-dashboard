@@ -1,146 +1,135 @@
 """
 scenario_view.py
 
-The Scenarios & Probability page (Sections 10 to 13 in the interface):
-the registry with markers, episodes and sources; severity and system
-impact elicitation (expert terms and the Gemini assessor) with the
-lambda blend and the exponents; the pi_s and p_s audit table; the per
-agent tier matrix across all scenarios including the labeled stress
-test; and the stability classification against the baseline.
+Scenarios & Probability page: the registry with the weekly recomputed
+admission (episodes, windows, frequencies beside the curated counts), the
+data derived emphasis multipliers and limit overrides, the severity and
+impact judgments (expert respondents and the auxiliary AI assessor), the
+scenario weight audit table, and the re runs with stability.
 """
 
-import os
 import pandas as pd
 import streamlit as st
 
+from modules import state, controls, genai, ui
 from modules import scenario_engine as se
-from modules.weight_manager import INTENSITY_SCALE, gmir
+from modules.weight_manager import INTENSITY_SCALE
 from modules.agent_engine import AGENTS
-from modules import genai
 
 
 def render(jurisdiction: str = "National") -> None:
-    st.header("Scenarios & Probability",
-              help="Sections 10 to 13: the historically constructed scenario "
-                   "set, the three component probability rule, scenario wise "
-                   "re stratification, and stability against the baseline.")
-    st.caption("A scenario modifies the decision environment, never the "
-               "disease data: its weight profile re runs the full second "
-               "generation MOSDM inside every agent.")
-
+    st.header("Scenarios & Probability")
+    st.caption("A scenario changes the decision environment (weights and the limits it tightens), "
+               "never the evidence; every agent is re stratified under every scenario.")
     reg = se.get_registry()
 
-    # 1) registry
-    st.subheader("1) Scenario Registry (constructed from 2016 to 2026 system history)")
-    show = reg[["Scenario ID", "Name", "Status", "Marker Condition",
-                "Episodes", "n_s", "Y_s (years observable)", "Sources"]]
-    st.dataframe(show, width="stretch", hide_index=True)
-    st.caption("Admission required at least one verifiable historical "
-               "occurrence; the ST1 economic lens has no countable marker and "
-               "runs as a clearly labeled, unweighted stress test outside the "
-               "probability normalization.")
+    st.subheader("1) Registry and weekly admission")
+    adm = se.admission_table()
+    show = adm.copy()
+    show["f_s 95% interval"] = show["f_s 95% interval"].apply(
+        lambda t: "" if t[0] != t[0] else f"{t[0]:.3f} to {t[1]:.3f}")
+    for c in ("Y_s", "f_s"):
+        show[c] = show[c].round(3)
+    st.dataframe(show.drop(columns=["weighted"]).astype(str), width="stretch", hide_index=True)
+    st.caption(f"Episode rule: marker weeks joined across interruptions of at most "
+               f"{state.setting('episode_gap_weeks')} weeks; an episode holds the marker in at least "
+               f"{state.setting('episode_min_weeks')} weeks (S4: three consecutive weeks by definition). "
+               "The interval is the exact Poisson 95% interval of the episode rate. ST1 has no countable "
+               "marker and runs as an unweighted stress test.")
+    with st.expander("Marker conditions and sources"):
+        st.dataframe(reg[["Scenario ID", "Name", "Status", "Marker Condition", "Episodes", "Sources"]].astype(str),
+                     width="stretch", hide_index=True)
 
-    # 2) severity and system impact elicitation
-    st.subheader("2) Severity and System Impact",
-                 help="Each quantity elicited on the four term fuzzy scale "
-                      "(GMIR defuzzification), from experts and from the "
-                      "Gemini assessor, blended with lambda (expert dominant).")
-    c1, c2, c3, c4, c5 = st.columns(5)
-    lam = c1.slider("lambda (expert share)", 0.0, 1.0, step=0.05, key="g_lam")
-    alpha = c2.slider("alpha (frequency)", 0.0, 2.0, step=0.1, key="g_alpha")
-    beta = c3.slider("beta (severity)", 0.0, 2.0, step=0.1, key="g_beta")
-    gamma = c4.slider("gamma (system impact)", 0.0, 2.0, step=0.1, key="g_gamma")
-    model = c5.selectbox("Gemini model",
-                         genai.KNOWN_MODELS + ["custom"], key="g_model_pick")
-    if model == "custom":
-        model = c5.text_input("Custom model name", key="g_model_custom",
-                              placeholder="for example gemini-2.5-pro")
-    st.session_state["g_model"] = model
+    st.subheader("2) Emphasis and limit overrides")
+    sid = st.selectbox("Scenario", se.scenario_ids(True), key="scen_em_pick")
+    em = se.emphasis_multipliers(sid)
+    if em.empty:
+        st.caption("No emphasized criteria.")
+    else:
+        st.dataframe(em.round(4).astype(str), width="stretch", hide_index=True)
+    ov = {k: se.scenario_limit_overrides(sid, k, jurisdiction) for k in AGENTS}
+    ov = {k: v for k, v in ov.items() if v}
+    if ov:
+        st.dataframe(pd.DataFrame([{"Agent": k, "Criterion": c, "Limit under the scenario": round(x, 4)}
+                                   for k, v in ov.items() for c, x in v.items()]),
+                     width="stretch", hide_index=True)
+        st.caption(f"Tightening: emphasized criteria with a history take its "
+                   f"P{int(round(100 * state.setting('tightening_quantile')))} inside the limits window; "
+                   "Rt takes its marker threshold 1.")
 
-    if st.button("Assess all scenarios with Gemini",
-                 disabled=not genai.gemini_available(),
-                 help="Sends each scenario's documented episodes and sources "
-                      "to the model; add GEMINI_API_KEY in Colab Secrets to enable."):
-        prog = st.progress(0.0, "Assessing")
-        rows = reg.to_dict("records")
-        for i, r in enumerate(rows):
-            try:
-                sev, imp, just = se.gemini_assess(pd.Series(r), model=model)
-                se.set_ai_assessment(r["Scenario ID"], sev, imp, just, model)
-            except Exception as e:
-                st.warning(f"{r['Scenario ID']}: assessment failed ({e})")
-            prog.progress((i + 1) / len(rows))
-        prog.empty()
-        st.success("Gemini assessments stored; every rating and its "
-                   "justification appears in the expanders below.")
+    st.subheader("3) Severity and System Impact")
+    controls.param_sliders(("lambda", "alpha", "beta", "gamma"))
+    lam, alpha, beta, gamma = controls.params()
+    if state.can_edit():
+        with st.expander("Record expert ratings (one respondent at a time)"):
+            c1, c2, c3, c4 = st.columns(4)
+            s_pick = c1.selectbox("Scenario", se.scenario_ids(True), key="exp_sid")
+            who = c2.text_input("Respondent", key="exp_who")
+            sev = c3.selectbox("Severity", list(INTENSITY_SCALE), key="exp_sev")
+            imp = c4.selectbox("System impact", list(INTENSITY_SCALE), key="exp_imp")
+            b1, b2 = st.columns(2)
+            if b1.button("Save rating", disabled=not who):
+                se.set_expert_terms(s_pick, sev, imp, who)
+                st.rerun()
+            if b2.button("Remove this respondent's rating", disabled=not who):
+                se.remove_expert(s_pick, who)
+                st.rerun()
+        if genai.gemini_available() and st.button("Assess every scenario with the AI assessor"):
+            prog = st.progress(0.0, "Assessing")
+            rows = reg.to_dict("records")
+            for i, r in enumerate(rows):
+                try:
+                    sv, iv, just = se.gemini_assess(pd.Series(r), model=state.setting("gemini_model"))
+                    se.set_ai_assessment(r["Scenario ID"], sv, iv, just, state.setting("gemini_model"))
+                except Exception as e:  # noqa: BLE001
+                    st.warning(f"{r['Scenario ID']}: assessment failed ({e})")
+                prog.progress((i + 1) / len(rows))
+            st.rerun()
+    rows = []
+    for s_id in se.scenario_ids(True):
+        a = se.get_assessments(s_id)
+        for who_, t in a.get("expert_respondents", {}).items():
+            rows.append({"Scenario": s_id, "Assessor": f"expert: {who_}", "Severity": t["severity"],
+                         "Impact": t["impact"], "Note": ""})
+        if a.get("ai"):
+            rows.append({"Scenario": s_id, "Assessor": f"AI ({a['ai'].get('model', '')})",
+                         "Severity": a["ai"]["severity"], "Impact": a["ai"]["impact"],
+                         "Note": a["ai"].get("justification", "")})
+    if rows:
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+    else:
+        st.caption("No ratings yet: every scenario uses the neutral Moderate term, flagged as default.")
 
-    with st.expander("Expert ratings and AI justifications, per scenario"):
-        for _, r in reg.iterrows():
-            sid = r["Scenario ID"]
-            st.markdown(f"**{sid}: {r['Name']}**")
-            e1, e2 = st.columns(2)
-            a = se.get_assessments(sid)
-            with e1:
-                sev = st.selectbox(f"Expert severity ({sid})",
-                                   ["(not rated)"] + list(INTENSITY_SCALE),
-                                   key=f"sev_{sid}")
-                imp = st.selectbox(f"Expert system impact ({sid})",
-                                   ["(not rated)"] + list(INTENSITY_SCALE),
-                                   key=f"imp_{sid}")
-                if st.button(f"Apply expert rating ({sid})", key=f"exp_{sid}"):
-                    if sev != "(not rated)" and imp != "(not rated)":
-                        se.set_expert_terms(sid, sev, imp)
-                        st.success(f"{sid}: severity {sev} "
-                                   f"(GMIR {gmir(*INTENSITY_SCALE[sev]):.3f}), "
-                                   f"impact {imp} "
-                                   f"(GMIR {gmir(*INTENSITY_SCALE[imp]):.3f})")
-            with e2:
-                ai = a.get("ai")
-                if ai:
-                    st.write(f"Gemini ({ai['model']}): severity {ai['severity']}, "
-                             f"impact {ai['impact']}")
-                    st.caption(ai.get("justification", ""))
-                else:
-                    st.caption("No AI assessment yet.")
-            st.divider()
-
-    # 3) probability audit table
-    st.subheader("3) Scenario Probabilities",
-                 help="pi_s = f_s^alpha * s_s^beta * h_s^gamma, normalized "
-                      "over the weighted scenarios; the baseline stays outside "
-                      "the aggregation as the stability reference.")
+    st.subheader("4) Scenario weights")
     prob = se.probability_table(lam, alpha, beta, gamma)
-    st.dataframe(prob, width="stretch", hide_index=True)
-    chart = prob.dropna(subset=["p_s"]).set_index("Scenario ID")["p_s"]
+    disp = prob.copy()
+    for c in ("Y_s", "f_s", "v_s", "h_s", "pi_s", "p_s"):
+        disp[c] = disp[c].round(4)
+    st.dataframe(disp.drop(columns=["weighted"]).astype(str), width="stretch", hide_index=True)
+    chart = prob.dropna(subset=["p_s"])
     if not chart.empty:
-        st.bar_chart(chart)
+        st.plotly_chart(ui.prob_bars(chart), width="stretch")
+    st.caption("pi_s = f_s^alpha v_s^beta h_s^gamma, normalized over the weighted scenarios; "
+               "the baseline is the reference outside the normalization. The weights are relative "
+               "importances of conditions that can overlap, not probabilities of disjoint events.")
 
-    # 4) re runs and stability per agent
-    st.subheader("4) Scenario Re Runs and Stability",
-                 help="Tier matrix: the full stratification re run under "
-                      "every scenario's weight profile; stability judged "
-                      "against the baseline, weighted by p_s.")
-    agent_key = st.selectbox("Agent", list(AGENTS),
-                             format_func=lambda k: AGENTS[k]["title"])
-    with st.spinner("Re running the stratification under every scenario"):
+    st.subheader("5) Re runs and stability")
+    agent_key = st.selectbox("Agent", list(AGENTS), format_func=lambda k: AGENTS[k]["title"],
+                             key="scen_agent")
+    with st.spinner("Re stratifying under every scenario"):
         tm = se.tier_matrix(agent_key, jurisdiction)
-        stab = se.stability_table(agent_key, jurisdiction,
-                                  lam, alpha, beta, gamma)
-    st.markdown("**Tier matrix (diseases by scenarios; 1 = top tier)**")
+        stab = se.stability_table(agent_key, jurisdiction, lam, alpha, beta, gamma)
+    st.markdown("**Tier matrix (1 = top tier)**")
     st.dataframe(tm, width="stretch")
-    st.markdown("**Stability classification (Section 13)**")
-    st.dataframe(stab, width="stretch", hide_index=True)
-    if st.button("AI tier interpretation", disabled=not genai.gemini_available(),
-                 help="Three sentence reading of the matrix; results unchanged."):
+    st.markdown("**Stability against the baseline**")
+    sd = stab.copy()
+    for c in ("Exposure E", "Instability I"):
+        sd[c] = pd.to_numeric(sd[c], errors="coerce").round(4)
+    st.dataframe(sd.astype(str), width="stretch", hide_index=True)
+    if genai.gemini_available() and state.can_edit() and st.button("AI reading of the tier matrix"):
         from modules import ssdm_core as sc
         try:
-            st.info(sc.interpret_tiers(AGENTS[agent_key]["title"],
-                                       tm.reset_index(), model))
-        except Exception as e:
+            st.info(sc.interpret_tiers(AGENTS[agent_key]["title"], tm.reset_index(),
+                                       state.setting("gemini_model")))
+        except Exception as e:  # noqa: BLE001
             st.error(f"Interpretation failed: {e}")
-    st.caption("Robust priority: the tier holds across every weighted "
-               "scenario. Scenario sensitive: displacement recorded with its "
-               "magnitude, direction, triggering scenarios, exposure, and the "
-               "probability weighted instability index. The stress test "
-               "column is shown for policy insight and enters none of these "
-               "quantities.")

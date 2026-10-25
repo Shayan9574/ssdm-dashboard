@@ -1,18 +1,28 @@
-import os
-import re
+"""
+live_connectors.py
+
+Readers over the CDC surveillance feeds (modules.feeds). Every reader
+returns the value for the dashboard's target week, the latest completed
+week minus the reporting lag, together with its date, and never fills a
+missing value.
+
+AS_OF (optional Timestamp) truncates every feed at a past date, which is
+how the weekly replay reconstructs the dashboard as it stood that week.
+
+Scope rules: NREVSS test positivity is published nationally only, so in a
+state scope it is missing rather than silently national; the wastewater
+feed is collected for Michigan sewersheds only and is labelled as such in
+every scope.
+"""
+
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
 import pandas as pd
-from modules.data_cache import read_excel_sheet
-import streamlit as st
-from typing import Dict, Any, Optional, Tuple
-from pathlib import Path
 
-DATA_FILE_PATHS = [
-    Path(__file__).resolve().parent.parent / "data" / "Research Data.xlsx",
-    Path(__file__).resolve().parent.parent / "Research Data.xlsx",
-    Path("data/Research Data.xlsx"),
-    Path("Research Data.xlsx")
-]
+from modules import feeds
+
+AS_OF: Optional[pd.Timestamp] = None
 
 STATE_NAMES = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -28,21 +38,23 @@ STATE_NAMES = {
     "DC": "District of Columbia", "PR": "Puerto Rico", "US": "United States", "USA": "United States",
     "NATIONAL": "United States"
 }
-
 NAME_TO_CODE = {v.lower(): k for k, v in STATE_NAMES.items()}
 NAME_TO_CODE.update({k.lower(): k for k in STATE_NAMES.keys()})
+NATIONAL_NAMES = {"national", "us", "usa", "united states", "all"}
 
-def get_data_filepath() -> Path:
-    for p in DATA_FILE_PATHS:
-        if p.exists():
-            return p
-    return DATA_FILE_PATHS[0]
+RESP = {"COVID-19": "c19", "Influenza": "flu", "RSV": "rsv"}
+
+
+def is_national(jur: str) -> bool:
+    return str(jur).strip().lower() in NATIONAL_NAMES
+
 
 def get_state_code(jur: str) -> str:
     j = str(jur).strip().lower()
-    if j in {"national", "us", "usa", "united states", "all"}:
+    if j in NATIONAL_NAMES:
         return "US"
     return NAME_TO_CODE.get(j, jur.upper()[:2])
+
 
 def get_state_full(jur: str) -> str:
     code = get_state_code(jur)
@@ -50,283 +62,290 @@ def get_state_full(jur: str) -> str:
         return "United States"
     return STATE_NAMES.get(code, jur.title())
 
-@st.cache_data(ttl=21600)
-def load_raw_sheet(sheet_name: str) -> pd.DataFrame:
-    fp = get_data_filepath()
-    df = read_excel_sheet(fp, sheet_name=sheet_name, header=1)
-    df.columns = [str(c).strip().lower().replace(" ", "_").replace("-", "_") for c in df.columns]
-    return df
 
-def extract_completed_series(
-    df: pd.DataFrame,
-    date_col: str,
-    lag_complete_weeks: int = 1
-) -> Tuple[pd.DataFrame, Optional[pd.Series]]:
+def load_raw_sheet(sheet_name: str) -> pd.DataFrame:
+    return feeds.load_feed(sheet_name)
+
+
+def _truncate(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
+    if df.empty or date_col not in df.columns:
+        return df
+    out = df.copy()
+    out[date_col] = pd.to_datetime(out[date_col], errors="coerce")
+    out = out.dropna(subset=[date_col])
+    if AS_OF is not None:
+        out = out[out[date_col] <= AS_OF]
+    return out
+
+
+def extract_completed_series(df: pd.DataFrame, date_col: str,
+                             lag_complete_weeks: int = 1) -> Tuple[pd.DataFrame, Optional[pd.Series]]:
+    """Weekly feeds: one row per week; the target row is the latest week
+    minus the lag."""
     if df.empty or date_col not in df.columns:
         return df, None
+    d = _truncate(df, date_col).sort_values(date_col, kind="mergesort").reset_index(drop=True)
+    if d.empty:
+        return d, None
+    weeks = d[date_col].drop_duplicates().sort_values().reset_index(drop=True)
+    target = weeks.iloc[max(0, len(weeks) - 1 - lag_complete_weeks)]
+    rows = d[d[date_col] == target]
+    return d[d[date_col] <= target], rows.iloc[-1]
 
-    df_sorted = df.copy()
-    df_sorted[date_col] = pd.to_datetime(df_sorted[date_col], errors="coerce")
-    df_sorted = df_sorted.dropna(subset=[date_col]).sort_values(date_col).reset_index(drop=True)
 
-    if df_sorted.empty:
-        return df_sorted, None
+# --- NHSN hospital respiratory data ----------------------------------------
 
-    target_idx = max(0, len(df_sorted) - 1 - lag_complete_weeks)
-    return df_sorted, df_sorted.iloc[target_idx]
-
-# --- 1. HOSPITAL ADMISSIONS & OCCUPANCY ---
-def get_hospital_respiratory_surveillance(jurisdiction: str = "National", lag_complete_weeks: int = 1) -> Dict[str, Any]:
+def _nhsn_jur(jurisdiction: str) -> pd.DataFrame:
     raw = load_raw_sheet("Weekly Hospital Respiratory Dat")
+    if raw.empty or "jurisdiction" not in raw.columns:
+        return pd.DataFrame()
     code = get_state_code(jurisdiction)
+    j = raw["jurisdiction"].astype(str).str.upper()
+    return raw[j.isin(["USA", "US", "NATIONAL"])] if code == "US" else raw[j == code]
 
-    if code == "US":
-        df_jur = raw[raw["jurisdiction"].astype(str).str.upper().isin(["USA", "US", "NATIONAL"])]
-    else:
-        df_jur = raw[raw["jurisdiction"].astype(str).str.upper() == code]
 
-    ts, latest = extract_completed_series(df_jur, "weekendingdate", lag_complete_weeks)
+def get_hospital_respiratory_surveillance(jurisdiction: str = "National",
+                                          lag_complete_weeks: int = 1) -> Dict[str, Any]:
+    ts, latest = extract_completed_series(_nhsn_jur(jurisdiction), "weekendingdate", lag_complete_weeks)
     if latest is None:
         return {}
+    g = lambda c: pd.to_numeric(latest.get(c), errors="coerce")
+    out = {"as_of_date": str(latest.get("weekendingdate"))[:10],
+           "inpatient_occ": g("pctinptbedsocc"), "icu_occ": g("pcticubedsocc")}
+    for d, s in [("covid", "c19"), ("flu", "flu"), ("rsv", "rsv")]:
+        out[f"{d}_adm_per100k"] = g(f"totalconf{s}newadmper100k")
+        out[f"{d}_icu_rate"] = g(f"pctconf{s}hosppatsicu")
+    return out
 
-    return {
-        "covid_adm_per100k": pd.to_numeric(latest.get("totalconfc19newadmper100k"), errors="coerce"),
-        "flu_adm_per100k": pd.to_numeric(latest.get("totalconfflunewadmper100k"), errors="coerce"),
-        "rsv_adm_per100k": pd.to_numeric(latest.get("totalconfrsvnewadmper100k"), errors="coerce"),
-        "covid_icu_rate": pd.to_numeric(latest.get("pctconfc19hosppatsicu"), errors="coerce"),
-        "flu_icu_rate": pd.to_numeric(latest.get("pctconffluhosppatsicu"), errors="coerce"),
-        "rsv_icu_rate": pd.to_numeric(latest.get("pctconfrsvhosppatsicu"), errors="coerce"),
-        "covid_ped_adm": pd.to_numeric(latest.get("numconfc19newadmped0to4per100k"), errors="coerce"),
-        "flu_ped_adm": pd.to_numeric(latest.get("numconfflunewadmped0to4per100k"), errors="coerce"),
-        "rsv_ped_adm": pd.to_numeric(latest.get("numconfrsvnewadmped0to4per100k"), errors="coerce"),
-        "covid_ger_adm": pd.to_numeric(latest.get("numconfc19newadmadult75plusper100k"), errors="coerce"),
-        "flu_ger_adm": pd.to_numeric(latest.get("numconfflunewadmadult75plusper100k"), errors="coerce"),
-        "rsv_ger_adm": pd.to_numeric(latest.get("numconfrsvnewadmadult75plusper100k"), errors="coerce"),
-        "inpatient_occ": pd.to_numeric(latest.get("pctinptbedsocc"), errors="coerce"),
-        "icu_occ": pd.to_numeric(latest.get("pcticubedsocc"), errors="coerce"),
-        "as_of_date": str(latest.get("weekendingdate"))[:10]
-    }
+
+def _nhsn_trend(jurisdiction: str, cols: Dict[str, str]) -> pd.DataFrame:
+    sub = _truncate(_nhsn_jur(jurisdiction), "weekendingdate")
+    if sub.empty:
+        return pd.DataFrame()
+    sub = sub.sort_values("weekendingdate").set_index("weekendingdate")
+    sub.index.name = "Date"
+    return pd.DataFrame({k: pd.to_numeric(sub[c], errors="coerce") for k, c in cols.items()
+                         if c in sub.columns}).dropna(how="all")
+
 
 def get_hospital_admission_trends(jurisdiction: str = "National") -> pd.DataFrame:
-    """Returns weekly new hospital admissions per 100k time-series for COVID-19, Influenza, and RSV."""
-    raw = load_raw_sheet("Weekly Hospital Respiratory Dat")
-    code = "USA" if jurisdiction in ["National", "US", "USA"] else jurisdiction.upper()[:2]
-    sub = raw[raw["jurisdiction"].astype(str).str.upper() == code].copy()
-    sub["Date"] = pd.to_datetime(sub["weekendingdate"], errors="coerce")
-    sub = sub.dropna(subset=["Date"]).sort_values("Date").set_index("Date")
-    df = pd.DataFrame({
-        "COVID-19": pd.to_numeric(sub["totalconfc19newadmper100k"], errors="coerce"),
-        "Influenza": pd.to_numeric(sub["totalconfflunewadmper100k"], errors="coerce"),
-        "RSV": pd.to_numeric(sub["totalconfrsvnewadmper100k"], errors="coerce")
-    })
-    return df.dropna(how="all")
+    return _nhsn_trend(jurisdiction, {"COVID-19": "totalconfc19newadmper100k",
+                                      "Influenza": "totalconfflunewadmper100k",
+                                      "RSV": "totalconfrsvnewadmper100k"})
+
 
 def get_hospital_occupancy_trends(jurisdiction: str = "National") -> pd.DataFrame:
-    """Returns weekly hospital bed and ICU occupancy rate trends."""
-    raw = load_raw_sheet("Weekly Hospital Respiratory Dat")
-    code = "USA" if jurisdiction in ["National", "US", "USA"] else jurisdiction.upper()[:2]
-    sub = raw[raw["jurisdiction"].astype(str).str.upper() == code].copy()
-    sub["Date"] = pd.to_datetime(sub["weekendingdate"], errors="coerce")
-    sub = sub.dropna(subset=["Date"]).sort_values("Date").set_index("Date")
-    df = pd.DataFrame({
-        "Inpatient Bed Occupancy (%)": pd.to_numeric(sub["pctinptbedsocc"], errors="coerce"),
-        "ICU Bed Occupancy (%)": pd.to_numeric(sub["pcticubedsocc"], errors="coerce")
-    })
-    return df.dropna(how="all")
+    return _nhsn_trend(jurisdiction, {"Inpatient Bed Occupancy (%)": "pctinptbedsocc",
+                                      "ICU Bed Occupancy (%)": "pcticubedsocc"})
 
-# --- 2. EMERGENCY DEPARTMENT VISITS ---
-def get_ed_visit_surveillance(jurisdiction: str = "National", lag_complete_weeks: int = 1) -> Dict[str, Any]:
+
+# --- NSSP emergency department visits --------------------------------------
+
+def _nssp_jur(jurisdiction: str) -> pd.DataFrame:
     raw = load_raw_sheet("NSSP Emergency Department Visit")
-    full_name = get_state_full(jurisdiction)
+    if raw.empty or "geography" not in raw.columns:
+        return pd.DataFrame()
+    geo = raw["geography"].astype(str).str.lower()
+    cty = raw["county"].astype(str) if "county" in raw.columns else "All"
+    if is_national(jurisdiction):
+        return raw[geo.isin(["united states", "national", "us"]) & (cty == "All")]
+    return raw[(geo == get_state_full(jurisdiction).lower()) & (cty == "All")]
 
-    if jurisdiction.lower() in {"national", "us", "usa", "united states"}:
-        df_jur = raw[(raw["geography"].astype(str).str.lower().isin(["united states", "national", "us"])) & (raw["county"] == "All")]
-    else:
-        df_jur = raw[(raw["geography"].astype(str).str.lower() == full_name.lower()) & (raw["county"] == "All")]
 
-    ts, latest = extract_completed_series(df_jur, "week_end", lag_complete_weeks)
+def get_ed_visit_surveillance(jurisdiction: str = "National",
+                              lag_complete_weeks: int = 1) -> Dict[str, Any]:
+    ts, latest = extract_completed_series(_nssp_jur(jurisdiction), "week_end", lag_complete_weeks)
     if latest is None:
         return {}
+    g = lambda c: pd.to_numeric(latest.get(c), errors="coerce")
+    return {"covid_ed_pct": g("percent_visits_covid"), "flu_ed_pct": g("percent_visits_influenza"),
+            "rsv_ed_pct": g("percent_visits_rsv"), "as_of_date": str(latest.get("week_end"))[:10]}
 
-    return {
-        "covid_ed_pct": pd.to_numeric(latest.get("percent_visits_covid"), errors="coerce"),
-        "flu_ed_pct": pd.to_numeric(latest.get("percent_visits_influenza"), errors="coerce"),
-        "rsv_ed_pct": pd.to_numeric(latest.get("percent_visits_rsv"), errors="coerce"),
-        "as_of_date": str(latest.get("week_end"))[:10]
-    }
 
 def get_ed_visit_trends(jurisdiction: str = "National") -> pd.DataFrame:
-    """Returns weekly ED syndromic visit percentage trends."""
-    raw = load_raw_sheet("NSSP Emergency Department Visit")
-    geo = "United States" if jurisdiction in ["National", "US", "USA"] else "Michigan"
-    sub = raw[(raw["geography"].astype(str).str.lower() == geo.lower()) & (raw["county"] == "All")].copy()
-    sub["Date"] = pd.to_datetime(sub["week_end"], errors="coerce")
-    sub = sub.dropna(subset=["Date"]).sort_values("Date").set_index("Date")
-    df = pd.DataFrame({
-        "COVID-19": pd.to_numeric(sub["percent_visits_covid"], errors="coerce"),
-        "Influenza": pd.to_numeric(sub["percent_visits_influenza"], errors="coerce"),
-        "RSV": pd.to_numeric(sub["percent_visits_rsv"], errors="coerce")
-    })
-    return df.dropna(how="all")
+    sub = _truncate(_nssp_jur(jurisdiction), "week_end")
+    if sub.empty:
+        return pd.DataFrame()
+    sub = sub.sort_values("week_end").set_index("week_end")
+    sub.index.name = "Date"
+    return pd.DataFrame({"COVID-19": pd.to_numeric(sub["percent_visits_covid"], errors="coerce"),
+                         "Influenza": pd.to_numeric(sub["percent_visits_influenza"], errors="coerce"),
+                         "RSV": pd.to_numeric(sub["percent_visits_rsv"], errors="coerce")}).dropna(how="all")
 
-# --- 3. LABORATORY TEST POSITIVITY ---
-def get_test_positivity_trends() -> pd.DataFrame:
-    """Returns weekly PCR laboratory test positivity trends across respiratory pathogens."""
-    raw = load_raw_sheet("Percent of Tests Positive for V")
-    piv = raw.pivot_table(index="week_end", columns="pathogen", values="percent_test_positivity", aggfunc="first")
-    piv.index = pd.to_datetime(piv.index)
+
+# --- NREVSS test positivity (national only) --------------------------------
+
+def get_test_positivity_trends(jurisdiction: str = "National") -> pd.DataFrame:
+    if not is_national(jurisdiction):
+        return pd.DataFrame()
+    raw = _truncate(load_raw_sheet("Percent of Tests Positive for V"), "week_end")
+    if raw.empty:
+        return pd.DataFrame()
+    piv = raw.pivot_table(index="week_end", columns="pathogen",
+                          values="percent_test_positivity", aggfunc="median")
     piv.index.name = "Date"
     return piv.sort_index().dropna(how="all")
 
-# --- 4. EPIDEMIC TRENDS & Rt ---
-def get_rt_surveillance(jurisdiction: str = "National", lag_complete_weeks: int = 1) -> Dict[str, Any]:
-    raw = load_raw_sheet("CDC Epidemic Trends and Rt")
-    full_name = get_state_full(jurisdiction)
-    
-    if jurisdiction.lower() in {"national", "us", "usa", "united states"}:
-        df_jur = raw[raw["state"].astype(str).str.lower().isin(["united states", "national", "us"])]
-    else:
-        df_jur = raw[raw["state"].astype(str).str.lower() == full_name.lower()]
 
+# --- CFA epidemic trends and Rt --------------------------------------------
+
+def _rt_jur(jurisdiction: str) -> pd.DataFrame:
+    raw = load_raw_sheet("CDC Epidemic Trends and Rt")
+    if raw.empty or "state" not in raw.columns:
+        return pd.DataFrame()
+    st_ = raw["state"].astype(str).str.lower()
+    sub = raw[st_.isin(["united states", "national", "us"])] if is_national(jurisdiction) \
+        else raw[st_ == get_state_full(jurisdiction).lower()]
+    sub = _truncate(sub, "date")
+    if "as_of" in sub.columns:
+        sub = sub.copy()
+        sub["as_of"] = pd.to_datetime(sub["as_of"], errors="coerce")
+        if AS_OF is not None:
+            sub = sub[sub["as_of"] <= AS_OF]
+    return sub
+
+
+def _latest_run_daily(sub: pd.DataFrame) -> pd.DataFrame:
+    """Daily estimates superseded by later model runs: for every date the
+    estimate of the most recent run (as_of) that covers it."""
+    if "as_of" not in sub.columns:
+        return sub.sort_values("date")
+    s = sub.sort_values(["date", "as_of"], kind="mergesort")
+    return s.groupby("date", as_index=False).tail(1).sort_values("date")
+
+
+def get_rt_surveillance(jurisdiction: str = "National",
+                        lag_complete_weeks: int = 1) -> Dict[str, Any]:
+    """Per disease: the median of the daily Rt and growth probability over
+    the seven days ending at the target date (latest estimated date minus
+    the lag in weeks), taken from the most recent model run of each date."""
+    sub = _rt_jur(jurisdiction)
     out = {}
-    for disease in df_jur["disease"].dropna().unique():
-        sub = df_jur[df_jur["disease"] == disease]
-        ts, latest = extract_completed_series(sub, "date", lag_complete_weeks)
-        if latest is not None:
-            out[str(disease).strip()] = {
-                "median": pd.to_numeric(latest.get("median"), errors="coerce"),
-                "p_growing": pd.to_numeric(latest.get("p_growing"), errors="coerce"),
-                "as_of_date": str(latest.get("date"))[:10]
-            }
+    if sub.empty:
+        return out
+    for disease in sub["disease"].dropna().unique():
+        d = _latest_run_daily(sub[sub["disease"] == disease])
+        if d.empty:
+            continue
+        target = d["date"].max() - pd.Timedelta(days=7 * lag_complete_weeks)
+        win = d[(d["date"] > target - pd.Timedelta(days=7)) & (d["date"] <= target)]
+        if win.empty:
+            continue
+        out[str(disease).strip()] = {
+            "median": float(pd.to_numeric(win["median"], errors="coerce").median()),
+            "p_growing": float(pd.to_numeric(win["p_growing"], errors="coerce").median()),
+            "as_of_date": str(target)[:10],
+        }
     return out
 
+
 def get_rt_trends(jurisdiction: str = "National") -> pd.DataFrame:
-    """
-    Returns daily Rt transmission velocity estimates.
-    Deduplicates multiple model run snapshots per date by taking the median estimate.
-    """
-    raw = load_raw_sheet("CDC Epidemic Trends and Rt")
-    geo = "United States" if jurisdiction in ["National", "US", "USA"] else "Michigan"
-    sub = raw[raw["state"].astype(str).str.lower() == geo.lower()].copy()
-    sub["Date"] = pd.to_datetime(sub["date"], errors="coerce")
-    
-    piv = sub.groupby(["Date", "disease"])["median"].median().unstack("disease")
-    return piv.sort_index().dropna(how="all")
-
-# --- 5. WASTEWATER SURVEILLANCE ---
-def get_wastewater_surveillance(jurisdiction: str = "National", lag_complete_weeks: int = 1) -> Dict[str, Any]:
-    raw = load_raw_sheet("CDC Wastewater Data for SARS-Co")
-    code = get_state_code(jurisdiction)
-
-    if code == "US":
-        df_jur = raw
-    else:
-        # Case-insensitive match for MI / Michigan
-        df_jur = raw[raw["state_territory"].astype(str).str.strip().str.lower().isin(["mi", "michigan"])]
-
-    ts, latest = extract_completed_series(df_jur, "sample_collect_date", lag_complete_weeks)
-    if latest is None:
-        return {}
-
-    return {
-        "viral_conc": pd.to_numeric(latest.get("pcr_target_avg_conc_lin"), errors="coerce"),
-        "as_of_date": str(latest.get("sample_collect_date"))[:10]
-    }
-
-def get_wastewater_trends(jurisdiction: str = "National") -> pd.DataFrame:
-    """
-    Returns sewershed viral concentration trend (SARS-CoV-2 copies/L).
-    Uses a 7-day rolling median across reporting sewersheds.
-    """
-    raw = load_raw_sheet("CDC Wastewater Data for SARS-Co")
-    code = get_state_code(jurisdiction)
-
-    if code == "US":
-        sub = raw.copy()
-    else:
-        # Case-insensitive match for MI / Michigan
-        sub = raw[raw["state_territory"].astype(str).str.strip().str.lower().isin(["mi", "michigan"])].copy()
-    
-    sub["Date"] = pd.to_datetime(sub["sample_collect_date"], errors="coerce")
-    daily_median = sub.groupby("Date")["pcr_target_avg_conc_lin"].median()
-    smoothed = daily_median.rolling(7, min_periods=1).mean().to_frame(name="SARS-CoV-2 Viral Load (copies/L)")
-    return smoothed.sort_index().dropna(how="all")
-
-def get_meningitis_trends(jurisdiction: str = "National") -> pd.DataFrame:
-    """
-    Returns weekly Meningococcal disease case counts alongside a 4-week moving average
-    to smooth low-incidence reporting batching.
-    """
-    raw = load_raw_sheet("NNDSS Weekly Data")
-    if raw.empty:
-        return pd.DataFrame()
-
-    df = raw.copy()
-
-    # 1. Map Socrata API field names
-    cols = {str(c).lower().strip().replace(" ", "_").replace("-", "_"): c for c in df.columns}
-    year_col = next((cols[k] for k in cols if k in ["year", "mmwr_year", "mmwryear"]), None)
-    week_col = next((cols[k] for k in cols if k in ["week", "mmwr_week", "mmwrweek"]), None)
-    area_col = next((cols[k] for k in cols if k in ["states", "reporting_area", "location", "jurisdiction", "state"]), None)
-    label_col = next((cols[k] for k in cols if k in ["label", "disease", "condition", "pathogen"]), None)
-    case_col = next((cols[k] for k in cols if k in ["m1", "current_week", "cases", "count", "num_cases", "data_value"]), None)
-
-    if not year_col or not week_col or not area_col or not case_col:
-        return pd.DataFrame()
-
-    # 2. Prevent sub-serogroup double-counting (isolate 'All serogroups')
-    if label_col:
-        mask_all = df[label_col].astype(str).str.lower().str.contains("all serogroups", na=False)
-        if mask_all.any():
-            df = df[mask_all].copy()
-
-    # 3. Clean strings & filter jurisdiction
-    df["_area_upper"] = df[area_col].astype(str).str.strip().str.upper()
-    code = get_state_code(jurisdiction)
-
-    if code == "US":
-        us_mask = df["_area_upper"].isin(["US RESIDENTS", "U.S. RESIDENTS", "TOTAL", "UNITED STATES", "US TOTAL", "TOTAL 50 STATES AND DC"])
-        if us_mask.any():
-            sub = df[us_mask].copy()
-        else:
-            divisions = [
-                "NEW ENGLAND", "MIDDLE ATLANTIC", "EAST NORTH CENTRAL", "WEST NORTH CENTRAL",
-                "SOUTH ATLANTIC", "EAST SOUTH CENTRAL", "WEST SOUTH CENTRAL", "MOUNTAIN", "PACIFIC",
-                "TERRITORIES", "AMERICAN SAMOA", "GUAM", "COMMONWEALTH OF NORTHERN MARIANA ISLANDS",
-                "PUERTO RICO", "VIRGIN ISLANDS"
-            ]
-            sub = df[~df["_area_upper"].isin(divisions)].copy()
-    else:
-        sub = df[df["_area_upper"].isin(["MI", "MICHIGAN", "MICH."]) | df["_area_upper"].str.startswith("MICH")].copy()
-
+    sub = _rt_jur(jurisdiction)
     if sub.empty:
         return pd.DataFrame()
+    parts = {}
+    for disease in sub["disease"].dropna().unique():
+        d = _latest_run_daily(sub[sub["disease"] == disease])
+        parts[str(disease)] = pd.to_numeric(d.set_index("date")["median"], errors="coerce")
+    df = pd.DataFrame(parts)
+    df.index.name = "Date"
+    return df.sort_index().dropna(how="all")
 
-    # 4. Clean numeric case values
-    cleaned = (
-        sub[case_col]
-        .astype(str)
-        .str.replace(",", "", regex=False)
-        .str.strip()
-        .replace(["-", "N", "U", "NP", "NC", "NN", "null", "nan", "None", "", "."], "0")
-    )
-    sub["cases"] = pd.to_numeric(cleaned, errors="coerce").fillna(0.0)
 
-    sub["year_num"] = pd.to_numeric(sub[year_col], errors="coerce")
-    sub["week_num"] = pd.to_numeric(sub[week_col], errors="coerce")
-    sub = sub.dropna(subset=["year_num", "week_num"]).copy()
-    sub["year_num"] = sub["year_num"].astype(int)
-    sub["week_num"] = sub["week_num"].astype(int)
-    sub = sub[(sub["week_num"] >= 1) & (sub["week_num"] <= 53)]
+# --- NWSS wastewater (Michigan sewersheds only) ----------------------------
 
-    # 5. Group by Year + Week and create date index
-    agg = sub.groupby(["year_num", "week_num"])["cases"].sum().reset_index()
-    agg["Date"] = pd.to_datetime(agg["year_num"].astype(str) + "-01-01") + pd.to_timedelta((agg["week_num"] - 1) * 7, unit="D")
-    
-    res = agg.dropna(subset=["Date"]).sort_values("Date").set_index("Date")
+WASTEWATER_SCOPE = "Michigan sewersheds"
 
-    # 6. Compute 4-week rolling average for clean trend visualization
+
+def _ww() -> pd.DataFrame:
+    raw = load_raw_sheet("CDC Wastewater Data for SARS-Co")
+    if raw.empty or "state_territory" not in raw.columns:
+        return pd.DataFrame()
+    sub = raw[raw["state_territory"].astype(str).str.strip().str.lower().isin(["mi", "michigan"])]
+    return _truncate(sub, "sample_collect_date")
+
+
+def get_wastewater_surveillance(jurisdiction: str = "National",
+                                lag_complete_weeks: int = 1) -> Dict[str, Any]:
+    """Median sewershed concentration over the week ending at the target
+    date; always the Michigan sewersheds, whatever the scope."""
+    sub = _ww()
+    if sub.empty:
+        return {}
+    last = sub["sample_collect_date"].max() - pd.Timedelta(days=7 * lag_complete_weeks)
+    win = sub[(sub["sample_collect_date"] > last - pd.Timedelta(days=7))
+              & (sub["sample_collect_date"] <= last)]
+    v = pd.to_numeric(win["pcr_target_avg_conc_lin"], errors="coerce").median()
+    return {"viral_conc": float(v) if v == v else np.nan, "as_of_date": str(last)[:10],
+            "scope": WASTEWATER_SCOPE}
+
+
+def get_wastewater_trends(jurisdiction: str = "National") -> pd.DataFrame:
+    sub = _ww()
+    if sub.empty:
+        return pd.DataFrame()
+    daily = sub.groupby("sample_collect_date")["pcr_target_avg_conc_lin"].apply(
+        lambda s: pd.to_numeric(s, errors="coerce").median())
+    out = daily.rolling(7, min_periods=1).mean().to_frame(
+        name=f"SARS-CoV-2 Viral Load, {WASTEWATER_SCOPE} (copies/L)")
+    out.index.name = "Date"
+    return out.sort_index().dropna(how="all")
+
+
+# --- NNDSS meningococcal disease -------------------------------------------
+
+def _mmwr_week_end(year: int, week: int) -> pd.Timestamp:
+    """Saturday ending MMWR week `week` of `year` (MMWR week 1 is the first
+    week, Sunday to Saturday, with at least four days in the year)."""
+    jan1 = pd.Timestamp(year=year, month=1, day=1)
+    # Sunday starting week 1
+    start = jan1 - pd.Timedelta(days=(jan1.dayofweek + 1) % 7)
+    if (jan1.dayofweek + 1) % 7 > 3:
+        start += pd.Timedelta(days=7)
+    return start + pd.Timedelta(days=7 * (week - 1) + 6)
+
+
+def nndss_weekly(df: pd.DataFrame, jurisdiction: str = "National") -> pd.DataFrame:
+    """year, week, cases for the scope. National: the US residents row
+    (labelled 'US RESIDENTS' to 2024 and 'U.S. RESIDENTS' from 2025); the
+    'TOTAL' row, which adds non residents and territories, is used only for
+    a week without a residents row. Unreported cells stay missing."""
+    area = df["states"].astype(str).str.strip().str.upper()
+    if get_state_code(jurisdiction) == "US":
+        pri = area.map({"US RESIDENTS": 0, "U.S. RESIDENTS": 0, "TOTAL": 1})
+    else:
+        pri = area.map({"MICHIGAN": 0, "MI": 0})
+    sub = df[pri.notna()].assign(_p=pri[pri.notna()])
+    if sub.empty:
+        return pd.DataFrame()
+    cases = pd.to_numeric(sub["m1"].astype(str).str.replace(",", "", regex=False).str.strip(),
+                          errors="coerce")
+    y = pd.to_numeric(sub["year"], errors="coerce")
+    w = pd.to_numeric(sub["week"], errors="coerce")
+    ok = y.notna() & w.notna() & (w >= 1) & (w <= 53)
+    t = pd.DataFrame({"year": y[ok].astype(int), "week": w[ok].astype(int),
+                      "cases": cases[ok], "_p": sub["_p"][ok]})
+    t = t.sort_values(["year", "week", "_p"]).groupby(["year", "week"], as_index=False).first()
+    return t[["year", "week", "cases"]]
+
+
+def get_meningitis_trends(jurisdiction: str = "National") -> pd.DataFrame:
+    """Weekly meningococcal cases (all serogroups) for the scope, with a four
+    week moving average; unreported cells stay missing."""
+    raw = load_raw_sheet("NNDSS Weekly Data")
+    if raw.empty or not {"year", "week", "states", "m1"} <= set(raw.columns):
+        return pd.DataFrame()
+    df = raw.copy()
+    if "label" in df.columns:
+        m = df["label"].astype(str).str.lower().str.contains("all serogroups", na=False)
+        if m.any():
+            df = df[m]
+    t = nndss_weekly(df, jurisdiction)
+    if t.empty:
+        return pd.DataFrame()
+    t["Date"] = [_mmwr_week_end(a, b) for a, b in zip(t["year"], t["week"])]
+    if AS_OF is not None:
+        t = t[t["Date"] <= AS_OF]
+    res = t.sort_values("Date").set_index("Date")[["cases"]]
     res["4-Week Average"] = res["cases"].rolling(window=4, min_periods=1).mean().round(1)
-    res = res.rename(columns={"cases": "Weekly Cases (Raw)"})
-
-    return res[["Weekly Cases (Raw)", "4-Week Average"]]
+    return res.rename(columns={"cases": "Weekly Cases"})

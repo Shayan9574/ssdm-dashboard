@@ -1,325 +1,248 @@
 """
 pages_e.py
 
-Checkpoint E pages: Overview (the landing page leading with the
-answer), Sensitivity & Simulation, Evidence & Data, and the
-Elicitation Studio. Built on the existing engines; heavy computation
-flows through the same cached functions every page shares, so the
-first load computes once and page switches are instant.
+Overview, Sensitivity & Simulation, External Evidence & Data, and the
+Elicitation Studio.
 """
 
-import os
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-from modules.mosdm_core import DEFAULT_MODE
 
-from modules import ui
+from modules import ui, state, controls, feeds
 from modules import scenario_engine as se
 from modules import ssdm_core as sc
 from modules import sensitivity as sens
 from modules import weight_manager as wm
-from modules.agent_engine import AGENTS, CORE4, run_agent
-from modules.evidence_gate import load_ledger
-from modules.load_data import (load_citations, load_derivations,
-                               load_data_dictionary, load_scenario_registry)
-
-
-def _params():
-    return (st.session_state.get("g_lam", 0.7),
-            st.session_state.get("g_alpha", 1.0),
-            st.session_state.get("g_beta", 1.0),
-            st.session_state.get("g_gamma", 1.0),
-            st.session_state.get("attainment_mode", DEFAULT_MODE))
+from modules.agent_engine import AGENTS, CORE4, default_limits, active_criteria, profile
+from modules.load_data import load_citations, load_derivations, load_data_dictionary
 
 
 def _strip(jurisdiction):
-    lam, a, b, g, mode = _params()
-    led = load_ledger()
-    n_ev = 0 if led.empty else int((led["status"] == "validated").sum())
-    ov_on = st.session_state.get("use_evidence_overlay", True)
+    s = state.settings()
+    from modules import live_subcriteria as ls
+    ref = ls.reference_week(jurisdiction)
     ui.context_strip([
         ("Scope", "US National" if jurisdiction == "National" else "Michigan", ""),
-        ("Engine", {"graded_calibrated": "2nd gen MOSDM, calibrated",
-                    "graded_fixed": "2nd gen MOSDM, fixed anchor",
-                    "binary": "1st gen (ablation)"}[mode], ""),
-        ("lambda, exponents", f"{lam:g}; {a:g}, {b:g}, {g:g}", ""),
-        ("Evidence overlay",
-         f"{n_ev} item(s), {'on' if ov_on else 'off'}", "ev"),
+        ("Data week", str(ref)[:10] if ref is not None else "none", ""),
+        ("Attainment", s["attainment_mode"].replace("_", " "), ""),
+        ("lambda, exponents", f"{s['lambda']:g}; {s['alpha']:g}, {s['beta']:g}, {s['gamma']:g}", ""),
+        ("Limits window", "since May 2023" if s["history_window"] != "full" else "full history", ""),
     ])
 
 
-# ----------------------------------------------------------------------
-# Overview
-# ----------------------------------------------------------------------
-
 def overview(jurisdiction="National"):
-    lam, a, b, g, mode = _params()
     _strip(jurisdiction)
-    st.title("National Prioritization Overview")
-    st.caption("Probability weighted across the historically grounded "
-               "scenario set, integrated over eight domain agents. Every "
-               "number traces to its source, calculation, and audit trail.")
-    with st.spinner("Computing the integrated picture (first load only)"):
-        M, res, _ = sc.cross_agent_run(jurisdiction, lam, a, b, g, mode, False)
-        ind1 = sc.indicators("A1", jurisdiction, lam, a, b, g, mode)
-        quad1 = sc.quadrants(ind1, st.session_state.get("g_theta", 0.7))
+    lam, a, b, g = controls.params()
+    theta = float(state.setting("theta_si"))
+    scope = "National" if jurisdiction == "National" else "Michigan"
+    st.title(f"{scope} Prioritization Overview")
+    st.caption("Scenario weighted and integrated over eight perspectives. Every number traces to "
+               "its source, its calculation and its audit trail (Method Trace).")
+    with st.spinner("Computing the integrated picture"):
+        M, res, _ = sc.cross_agent_run(jurisdiction, lam, a, b, g, "", False)
+        _, base, _ = sc.cross_agent_run(jurisdiction, lam, a, b, g, "", True)
+        quads = {k: sc.quadrants(sc.indicators(k, jurisdiction, lam, a, b, g), theta) for k in AGENTS}
         prob = se.probability_table(lam, a, b, g)
-        stab1 = se.stability_table("A1", jurisdiction, lam, a, b, g)
-
     left, right = st.columns([1.15, 0.85])
     with left:
-        st.subheader("Final Integrated Stratification")
-        qmap = dict(zip(quad1["Disease"], quad1["Quadrant"]))
-        stabmap = stab1.set_index("Disease")
-        for rank, d in enumerate(res.order, 1):
+        st.subheader("Final integrated stratification")
+        rk = res.ranks()
+        for d in res.order:
             t = res.tiers[d]
-            cls = stabmap.loc[d, "Classification"] if d in stabmap.index else ""
-            expo = stabmap.loc[d, "Exposure (sum p_s)"] if d in stabmap.index else 0
-            why = (f"Overall rank {rank}; S = {res.scores[d]:.3f}; "
-                   f"Agent 1 view: {cls.lower()}"
-                   + (f", exposure {expo:g}" if cls == "Scenario sensitive" else ""))
-            ui.tier_card(t, ui.SHORT.get(d, d), [qmap.get(d, "")], why,
-                         is_target=(res.targets[t] == d))
+            cls = {k: q.set_index("Disease").at[d, "Quadrant"] for k, q in quads.items()
+                   if d in set(q["Disease"])}
+            crit = [sc.AGENT_LABELS[k] for k, c in cls.items() if c == "Conditionally critical"]
+            struct = [sc.AGENT_LABELS[k] for k, c in cls.items() if c == "Structural priority"]
+            why = (f"Rank {rk[d]:g}; baseline tier {base.tiers.get(d)}; structural priority in "
+                   f"{len(struct)} perspective(s)" + (f"; conditionally critical in {', '.join(crit)}" if crit else ""))
+            ui.tier_card(t, ui.SHORT.get(d, d), [], why, is_target=(res.targets[t] == d))
     with right:
-        st.subheader("Priority versus Stability")
-        st.plotly_chart(ui.quadrant_chart(
-            quad1, st.session_state.get("g_theta", 0.7),
-            "Agent 1: Epidemiological Burden"), use_container_width=True)
-
-    c1, c2 = st.columns([1, 1])
+        st.subheader("Typology across perspectives")
+        tab = pd.DataFrame({sc.AGENT_LABELS[k]: q.set_index("Disease")["Quadrant"] for k, q in quads.items()})
+        tab.index = [ui.SHORT.get(i, i) for i in tab.index]
+        st.dataframe(tab, width="stretch")
+    c1, c2 = st.columns(2)
     with c1:
-        st.subheader("Scenario Probability Mass")
-        st.plotly_chart(ui.prob_bars(prob), use_container_width=True)
+        st.subheader("Scenario weights")
+        st.plotly_chart(ui.prob_bars(prob), width="stretch")
     with c2:
-        st.subheader("Active Signals")
-        reg = load_scenario_registry()
-        s7 = reg[reg["Scenario ID"] == "S7"]
-        if not s7.empty:
-            ui.signal("<b>S7 marker context.</b> " +
-                      str(s7.iloc[0]["Sources"])[:160] + ".", warn=True)
-        led = load_ledger()
-        if not led.empty:
-            v = int((led["status"] == "validated").sum())
-            q = int((led["status"] == "quarantined").sum())
-            ui.signal(f"<b>Evidence Gate.</b> {v} validated and applied; "
-                      f"{q} quarantined with reasons; full ledger under "
-                      "Evidence &amp; Data.")
-        defaults = sum(1 for k in AGENTS
-                       if wm.get_weights(k, AGENTS[k]["criteria"])[1] == "default")
+        st.subheader("Signals")
+        from modules import evidence_gate as eg, live_subcriteria as ls
+        adm = se.admission_table()
+        diff = adm[(adm["Source"] == "computed from the weekly series")
+                   & (adm["n_s"] != pd.to_numeric(adm["Registry n_s"], errors="coerce"))]
+        if not diff.empty:
+            ui.signal("<b>Admission.</b> Recomputed episode counts differ from the curated registry for "
+                      + ", ".join(diff["Scenario ID"]) + " (Scenarios page).", warn=True)
+        ext = eg.external_evidence()
+        if not ext.empty and "differs_notably" in ext.columns:
+            n = int(ext["differs_notably"].astype(bool).sum())
+            ui.signal(f"<b>External evidence.</b> {len(ext)} validated figure(s); {n} differ notably from "
+                      "the dashboard's values (information only).", warn=n > 0)
+        defaults = [k for k in AGENTS if wm.get_entry("criterion", k) is None]
         if defaults:
-            ui.signal(f"<b>Elicitation.</b> Weights are defaults on "
-                      f"{defaults} of 8 agents; supply expert judgment in "
-                      "the Elicitation Studio.")
-        st.subheader("How to read this")
-        st.caption("Tier 1: inside the tolerance band of the best weighted "
-                   "attainment; the target state is the member closest to "
-                   "the ideal. Quadrants cross expected priority with "
-                   "stability across scenarios. The overlay toggle and all "
-                   "parameters live on each analysis page.")
+            ui.signal(f"<b>Judgment.</b> Equal default weights on {len(defaults)} of 8 perspectives; "
+                      "expert input can be entered in the Elicitation Studio.")
+        notes = ls.freshness_report(jurisdiction)
+        from modules.agents.agent7_outbreak import rt_current
+        n_stale = len(notes) + len(rt_current(jurisdiction)[1])
+        if n_stale:
+            ui.signal(f"<b>Surveillance.</b> {n_stale} live value(s) treated as missing because stale "
+                      "or out of scope (agent pages list them).", warn=True)
 
-
-# ----------------------------------------------------------------------
-# Sensitivity & Simulation
-# ----------------------------------------------------------------------
 
 def sensitivity_page(jurisdiction="National"):
-    lam, a, b, g, mode = _params()
     _strip(jurisdiction)
+    lam, a, b, g = controls.params()
     st.title("Sensitivity & Simulation")
-    st.caption("How much do conclusions depend on the parameters? Sweeps "
-               "recompute the full chain; the Monte Carlo perturbs judgment "
-               "inputs and reports robustness as probabilities.")
-
-    st.subheader("1) Parameter sweeps (one at a time)")
+    st.caption("Recomputes the full chain with the current inputs and settings. The full evaluation "
+               "protocol of the paper (ablation, factorial design, Sobol indices, acceptability, "
+               "benchmarks, imperfect evidence, replay, scaling) runs from scripts/experiments.")
+    st.subheader("1) One at a time sweeps")
     param = st.selectbox("Parameter", ["lam", "a", "b", "g"],
-                         format_func={"lam": "lambda (expert share)",
-                                      "a": "alpha (frequency exponent)",
-                                      "b": "beta (severity exponent)",
-                                      "g": "gamma (impact exponent)"}.get)
-    grid = tuple(np.round(np.arange(0.0, 2.01, 0.25), 2)) if param != "lam" \
-        else tuple(np.round(np.arange(0.0, 1.01, 0.1), 2))
-    ak_s = st.selectbox("Agent for the expected rank view", list(AGENTS),
-                        format_func=lambda k: AGENTS[k]["title"],
-                        key="sens_agent")
+                         format_func={"lam": "lambda", "a": "alpha", "b": "beta", "g": "gamma"}.get)
+    grid = tuple(np.round(np.arange(0.0, 1.01, 0.1), 2)) if param == "lam" else \
+        tuple(np.round(np.arange(0.0, 2.01, 0.25), 2))
+    ak = st.selectbox("Agent for the expected ranks", list(AGENTS), format_func=lambda k: AGENTS[k]["title"],
+                      key="sens_agent")
+    if not st.session_state.get("sens_run") and not st.button("Run the sweeps", type="primary"):
+        st.caption("Each sweep re runs the complete chain at every grid point; results are kept "
+                   "until an input or setting changes.")
+        return
+    st.session_state["sens_run"] = True
     with st.spinner("Sweeping the full chain"):
-        sw = sens.parameter_sweep(param, grid, jurisdiction, lam, a, b, g, mode)
+        sw = sens.parameter_sweep(param, grid, jurisdiction, lam, a, b, g)
         ps = sens.prob_sweep(param, grid, lam, a, b, g)
-        rs = sens.r_sweep(param, grid, ak_s, jurisdiction, lam, a, b, g, mode)
+        rs = sens.r_sweep(param, grid, ak, jurisdiction, lam, a, b, g)
     c1, c2 = st.columns(2)
     with c1:
         fig = go.Figure()
         for sid in sorted(ps["Scenario"].unique()):
             dd = ps[ps["Scenario"] == sid]
-            fig.add_trace(go.Scatter(x=dd["value"], y=dd["p_s"],
-                                     mode="lines", name=sid))
-        fig.update_yaxes(title="Scenario probability p_s")
-        fig.update_xaxes(title=param)
-        fig.update_layout(title="What the parameter moves first: p_s")
-        st.plotly_chart(ui._base_layout(fig), use_container_width=True)
+            fig.add_trace(go.Scatter(x=dd["value"], y=dd["p_s"], mode="lines", name=sid))
+        fig.update_yaxes(title="Scenario weight p_s"); fig.update_xaxes(title=param)
+        st.plotly_chart(ui._base_layout(fig), width="stretch")
     with c2:
         fig = go.Figure()
         for d in CORE4:
             dd = rs[rs["Disease"] == d]
-            fig.add_trace(go.Scatter(x=dd["value"], y=dd["R"],
-                                     mode="lines+markers",
-                                     name=ui.SHORT.get(d, d)))
-        fig.update_yaxes(title="Expected rank R", autorange="reversed")
-        fig.update_xaxes(title=param)
-        fig.update_layout(title="How expected priorities respond: R per disease")
-        st.plotly_chart(ui._base_layout(fig), use_container_width=True)
+            fig.add_trace(go.Scatter(x=dd["value"], y=dd["R"], mode="lines+markers", name=ui.SHORT.get(d, d)))
+        fig.update_yaxes(title="Expected rank R", autorange="reversed"); fig.update_xaxes(title=param)
+        st.plotly_chart(ui._base_layout(fig), width="stretch")
     fig = go.Figure()
     for d in CORE4:
         dd = sw[sw["Disease"] == d]
-        fig.add_trace(go.Scatter(x=dd["value"], y=dd["Final rank"],
-                                 mode="lines+markers", name=ui.SHORT.get(d, d)))
-    fig.update_yaxes(title="Final integrated rank", autorange="reversed", dtick=1)
-    fig.update_xaxes(title=param)
-    fig.update_layout(title="Does the conclusion change: final integrated ranks")
-    st.plotly_chart(ui._base_layout(fig), use_container_width=True)
-    if sw.groupby("Disease")["Final rank"].nunique().max() == 1:
-        st.success("Robustness finding: the final integrated ranking does "
-                   "not change anywhere on this grid. The two charts above "
-                   "show the movement underneath (probabilities and expected "
-                   "ranks) that the discrete conclusion absorbs.")
-    st.caption("Note on lambda: it blends expert and AI intensity ratings, "
-               "so it moves nothing until both sources exist for at least "
-               "one scenario (rate scenarios on the Scenarios page).")
+        fig.add_trace(go.Scatter(x=dd["value"], y=dd["Final rank"], mode="lines+markers", name=ui.SHORT.get(d, d)))
+    fig.update_yaxes(title="Final integrated rank", autorange="reversed"); fig.update_xaxes(title=param)
+    st.plotly_chart(ui._base_layout(fig), width="stretch")
+    st.caption("lambda moves nothing until a scenario holds both expert and AI ratings.")
 
-    st.subheader("2) Monte Carlo robustness of agent importance weights")
+    st.subheader("2) Monte Carlo acceptability of the perspective weights")
     n = st.slider("Draws", 100, 2000, 500, 100)
-    conc = st.slider("Concentration (higher = smaller perturbations)",
-                     10, 200, 60, 10)
+    conc = st.slider("Concentration (higher = smaller perturbations)", 10, 200, 60, 10)
     with st.spinner("Simulating"):
-        tiers, ranks = sens.weight_monte_carlo(jurisdiction, lam, a, b, g,
-                                               mode, n, float(conc))
+        tiers, ranks = sens.weight_monte_carlo(jurisdiction, lam, a, b, g, "", n, float(conc))
     c1, c2 = st.columns(2)
-    with c1:
-        st.dataframe(tiers, width="stretch", hide_index=True)
-        st.caption("Probability of each tier under Dirichlet perturbation "
-                   "of W_g centered on the active weights.")
-    with c2:
-        fig = go.Figure()
-        for d in CORE4:
-            fig.add_trace(go.Box(
-                y=ranks[ranks["Disease"] == d]["Rank"],
-                name=ui.SHORT.get(d, d), boxmean=True))
-        fig.update_yaxes(title="Integrated rank", autorange="reversed", dtick=1)
-        st.plotly_chart(ui._base_layout(fig), use_container_width=True)
+    c1.dataframe(tiers.round(3), width="stretch", hide_index=True)
+    fig = go.Figure()
+    for d in CORE4:
+        fig.add_trace(go.Box(y=ranks[ranks["Disease"] == d]["Rank"], name=ui.SHORT.get(d, d), boxmean=True))
+    fig.update_yaxes(title="Integrated rank", autorange="reversed")
+    c2.plotly_chart(ui._base_layout(fig), width="stretch")
 
     st.subheader("3) Stability threshold and attainment mode")
     c3, c4 = st.columns(2)
     with c3:
-        ak = st.selectbox("Agent for the theta sweep", list(AGENTS),
-                          format_func=lambda k: AGENTS[k]["title"])
-        ts = sens.theta_sweep(ak, jurisdiction, lam, a, b, g, mode)
-        piv = ts.pivot_table(index="Disease", columns="theta",
-                             values="Quadrant", aggfunc="first")
+        ak2 = st.selectbox("Agent for the threshold sweep", list(AGENTS), format_func=lambda k: AGENTS[k]["title"],
+                           key="sens_theta_agent")
+        ts = sens.theta_sweep(ak2, jurisdiction, lam, a, b, g)
+        piv = ts.pivot_table(index="Disease", columns="theta", values="Quadrant", aggfunc="first")
         piv.index = [ui.SHORT.get(i, i) for i in piv.index]
         st.dataframe(piv, width="stretch")
-        st.caption("Quadrant membership as the stability cut moves; cells "
-                   "that never change are theta robust conclusions.")
     with c4:
         mc = sens.mode_comparison(jurisdiction, lam, a, b, g)
         mc.index = [ui.SHORT.get(i, i) for i in mc.index]
         st.dataframe(mc, width="stretch")
-        st.caption("The integrated conclusion under the three attainment "
-                   "modes; the binary column is the first generation "
-                   "ablation.")
 
-
-# ----------------------------------------------------------------------
-# Evidence & Data
-# ----------------------------------------------------------------------
 
 def evidence_data(jurisdiction="National"):
     _strip(jurisdiction)
-    st.title("Evidence & Data")
-    tabs = st.tabs(["Master Dataset", "Evidence Ledger", "Citations",
-                    "Derivations", "Scenario Registry", "Data Dictionary"])
+    st.title("External Evidence & Data")
+    tabs = st.tabs(["External evidence", "Gate ledger", "Surveillance feeds", "Decision matrix",
+                    "Citations", "Derivations", "Scenario registry", "Data dictionary"])
+    from modules import evidence_gate as eg
     with tabs[0]:
-        from modules.agent_m_data import (get_active_decision_matrix,
-                                          build_harmonized_long_table)
-        with st.spinner("Loading the master matrix"):
-            wide = get_active_decision_matrix(jurisdiction=jurisdiction)
-        st.subheader("Active decision matrix (baseline plus live merge)")
-        st.dataframe(wide, width="stretch", hide_index=True)
-        with st.expander("Harmonized long table"):
-            st.dataframe(build_harmonized_long_table(), width="stretch",
-                         hide_index=True)
-    tabs = tabs[1:]
-    with tabs[0]:
-        led = load_ledger()
-        if led.empty:
-            st.info("No gate runs recorded yet; retrieve structured "
-                    "evidence on any agent page.")
+        ext = eg.external_evidence()
+        if ext.empty:
+            st.info("No validated external evidence yet; retrieve it on any agent page (editor).")
         else:
-            f = st.multiselect("Status", sorted(led["status"].unique()),
-                               default=list(sorted(led["status"].unique())))
-            st.dataframe(led[led["status"].isin(f)], width="stretch",
-                         hide_index=True)
-            st.download_button("Download ledger (CSV)",
-                               led.to_csv(index=False), "evidence_ledger.csv")
+            st.dataframe(ext.astype(str), width="stretch", hide_index=True)
+            st.caption("Validated figures from official external sources, for decision makers. They "
+                       "never change the stratification; 'differs_notably' marks a figure more than 25 "
+                       "percent away from the dashboard's value.")
     with tabs[1]:
-        st.dataframe(load_citations(), width="stretch", hide_index=True)
+        led = eg.load_ledger()
+        if led.empty:
+            st.info("No gate runs recorded yet.")
+        else:
+            f = st.multiselect("Status", sorted(led["status"].unique()), default=sorted(led["status"].unique()))
+            st.dataframe(led[led["status"].isin(f)].astype(str), width="stretch", hide_index=True)
+            st.download_button("Download ledger (CSV)", led.to_csv(index=False), "evidence_ledger.csv")
     with tabs[2]:
-        st.dataframe(load_derivations(), width="stretch", hide_index=True)
-        st.caption("The detailed calculation behind every derived baseline "
-                   "figure: formula, numerator with source, denominator "
-                   "with Census vintage, result, uncertainty.")
+        st.dataframe(feeds.data_status(), width="stretch", hide_index=True)
+        log = feeds.update_log()
+        if log is not None:
+            st.markdown("**What changed with the latest weekly update**")
+            st.dataframe(log.astype(str), width="stretch", hide_index=True) if not log.empty else \
+                st.caption("No change in episode counts, scenario weights, limits or final tiers.")
+        from modules import live_subcriteria as ls
+        st.markdown("**Historical statistics inside the limits window**")
+        st.dataframe(pd.DataFrame(ls.historical_stats(jurisdiction, 1, state.setting("history_window"))).T,
+                     width="stretch")
     with tabs[3]:
-        st.dataframe(load_scenario_registry(), width="stretch",
-                     hide_index=True)
+        from modules.agent_m_data import get_active_decision_matrix
+        st.dataframe(get_active_decision_matrix(jurisdiction).astype(str), width="stretch", hide_index=True)
     with tabs[4]:
-        st.dataframe(load_data_dictionary(), width="stretch",
-                     hide_index=True)
+        st.dataframe(load_citations().astype(str), width="stretch", hide_index=True)
+    with tabs[5]:
+        st.dataframe(load_derivations().astype(str), width="stretch", hide_index=True)
+    with tabs[6]:
+        st.dataframe(se.get_registry().astype(str), width="stretch", hide_index=True)
+    with tabs[7]:
+        st.dataframe(load_data_dictionary().astype(str), width="stretch", hide_index=True)
 
-
-# ----------------------------------------------------------------------
-# Elicitation Studio
-# ----------------------------------------------------------------------
 
 def elicitation_studio(jurisdiction="National"):
     _strip(jurisdiction)
     st.title("Elicitation Studio")
-    st.caption("Every judgment input in one place: subcriterion weights and "
-               "acceptable limits per agent, scenario intensities, and the "
-               "agent importance weights, each through the four input modes "
-               "with provenance.")
-
+    st.caption("Every judgment input: baseline weights and limits per perspective, weights under each "
+               "scenario, the perspective weights W_g, and (on the Scenarios page) severity and impact. "
+               "Each input keeps its provenance, author and time.")
     rows = []
     for k in AGENTS:
-        _, wprov = wm.get_weights(k, AGENTS[k]["criteria"])
+        _, wprov = wm.get_weights(k, active_criteria(profile(k, jurisdiction, tuple(CORE4)), k))
         _, lprov = wm.get_expert_limits(k)
-        rows.append({"Agent": AGENTS[k]["title"], "Weights": wprov,
-                     "Limits": lprov})
-    _, agprov = sc.get_agent_weights()
-    st.subheader("Readiness")
+        scen = [s for s in se.scenario_ids(True) if wm.get_entry("criterion", f"{k}::{s}")]
+        rows.append({"Perspective": AGENTS[k]["title"], "Baseline weights": wprov, "Limits": lprov,
+                     "Scenario specific weights": ", ".join(scen) or "none (data derived emphasis)"})
     st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
-    st.caption(f"Agent importance weights W_g: {agprov}. Defaults are "
-               "legitimate but deliberate choices; anything elicited below "
-               "recomputes everywhere instantly.")
+    st.caption(f"Perspective weights W_g: {sc.get_agent_weights()[1]}.")
 
-    st.subheader("Per agent elicitation")
-    ak = st.selectbox("Agent", list(AGENTS),
-                      format_func=lambda k: AGENTS[k]["title"],
-                      key="studio_agent")
-    with st.spinner("Loading the agent's evidence"):
-        profile, result, *_ = run_agent(ak, jurisdiction, CORE4)
-    t1, t2 = st.tabs(["Subcriterion weights", "Acceptable limits"])
+    ak = st.selectbox("Perspective", list(AGENTS), format_func=lambda k: AGENTS[k]["title"], key="studio_agent")
+    prof = profile(ak, jurisdiction, tuple(CORE4))
+    act = active_criteria(prof, ak)
+    t1, t2, t3 = st.tabs(["Baseline weights", "Acceptable limits", "Weights under a scenario"])
     with t1:
-        wm.render_weight_elicitation(ak, AGENTS[ak]["title"],
-                                     AGENTS[ak]["criteria"])
+        wm.render_weight_elicitation(ak, AGENTS[ak]["title"], act)
     with t2:
-        from modules.agent_engine import median_limits_for
-        wm.render_limits_editor(ak, AGENTS[ak]["title"], profile,
-                                AGENTS[ak]["criteria"],
-                                median_limits_for(profile,
-                                                  AGENTS[ak]["criteria"]))
-
-    st.subheader("Agent importance weights (W_g)")
-    wm.render_weight_elicitation("agent_level::global",
-                                 "Cross agent integration", list(AGENTS))
-    st.caption("Scenario severity and system impact are elicited on the "
-               "Scenarios & Probability page beside their audit table.")
+        wm.render_limits_editor(ak, AGENTS[ak]["title"], AGENTS[ak]["criteria"],
+                                default_limits(ak, jurisdiction, tuple(CORE4)))
+    with t3:
+        sid = st.selectbox("Scenario", se.scenario_ids(True), key="studio_scen")
+        w, prov = se.scenario_weights(sid, ak, act)
+        st.caption(f"Current weights under {sid} ({prov}).")
+        wm.render_weight_elicitation(f"{ak}::{sid}", f"{AGENTS[ak]['title']} under {sid}", act)
+    st.subheader("Perspective weights W_g")
+    wm.render_weight_elicitation("agent_level::global", "Cross agent integration", list(AGENTS))

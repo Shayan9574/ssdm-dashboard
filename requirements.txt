@@ -1,7 +1,11 @@
-streamlit>=1.30.0
-pandas>=2.0.0
-numpy>=1.24.0
-openpyxl>=3.1.0
-requests>=2.31.0
-plotly>=5.18.0
-pyarrow>=14.0.0
+# Versions the dashboard was verified with (Checkpoint H); Python 3.12 or 3.13.
+streamlit==1.65.0
+pandas==3.0.5
+numpy==2.5.3
+scipy==1.18.1
+openpyxl==3.1.5
+pyarrow==25.0.1
+requests==2.34.2
+plotly==7.1.0
+gspread==6.2.1
+google-auth==2.62.0

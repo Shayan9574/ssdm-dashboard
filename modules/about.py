@@ -41,36 +41,44 @@ def render():
         )
 
     # --- 3. MATHEMATICAL DECISION SCIENCE ---
-    st.markdown("**3. Mathematical Formulations & Decision Science**")
-    
-    with st.expander("📐 MOSDM core: graded attainment and tolerance tiers", expanded=True):
+    st.markdown("**3. Method**")
+    with st.expander("Stratification core", expanded=True):
         st.markdown(
-            "Every criterion is oriented so that larger means more urgent (cost space; benefit criteria and the "
-            "clinical time windows are inverted). Each value is converted to a **graded attainment** "
-            "$\\tilde a_{ij} \\in [0,1]$ against the criterion limits, which come from expert limits when "
-            "elicited, otherwise from historical surveillance quantiles, otherwise from the pool median. "
-            "The selected default uses a fixed anchor $\\theta = 0.3$ (selected by a preregistered baseline study).\n\n"
-            "$$K_i = \\sum_j w_j\\,\\tilde a_{ij}, \\qquad \\delta = \\min_{j:\\,w_j>0} w_j$$\n\n"
-            "* **Tiering:** the pathogen with the largest weighted attainment $K_{\\max}$ enters Tier 1 together "
-            "with every pathogen within the tolerance $\\delta$ of it; the tier is removed and the step repeats.\n"
-            "* **Dominance guard:** a pathogen that is dominated on all shared observed criteria cannot be placed "
-            "above the pathogen that dominates it.\n"
-            "* **Separation:** the attainment margin between the weakest member of a tier and the strongest "
-            "remaining pathogen, reported as a measure of how firm each tier boundary is."
-        )
-
-    with st.expander("⚖️ SSDM scenario layer and integration", expanded=False):
+            "Every criterion carries a direction; comparisons are made in oriented space. A criterion is "
+            "active when observed for at least two diseases; missing values are never filled, and a disease "
+            "observed on no active criterion is reported as not stratifiable.\n\n"
+            "* **Limits:** expert limit, else the median of the criterion's history inside the limits window "
+            "(since the end of the public health emergency on 11 May 2023, then the five most recent "
+            "seasons), else the median of the diseases in the pool.\n"
+            "* **Graded attainment:** the value and the limit are placed on the range of the pool together "
+            "with the limit; attainment rises from 0 to the anchor $\\theta$ at the limit and to 1 at the "
+            "strongest end (fixed anchor 0.3 by default; calibrated and binary modes available).\n\n"
+            "$$K_i = \\frac{\\sum_{j \\in O_i} w_j\\,\\tilde a_{ij}}{\\sum_{j \\in O_i} w_j}, \\qquad "
+            "\\delta = \\min_{j:\\,w_j>0} w_j$$\n\n"
+            "* **Tiers:** every disease within the tolerance $\\delta$ of the largest $K$ joins the tier; "
+            "a member strictly weaker than another on every shared informative criterion is demoted.\n"
+            "* **Order and margins:** the target is the member closest to the ideal point; members are "
+            "ordered by their weighted distance to it, ties sharing the average rank; every tier boundary "
+            "reports its attainment margin.")
+    with st.expander("Scenario layer and integration", expanded=False):
         st.markdown(
-            "* **Scenarios:** nine registered scenarios (S1 to S9) plus the steady state ST1. Each scenario "
-            "emphasizes criteria (weight multiplied by three on the elicited base) and, by default, tightens the "
-            "limits of emphasized live criteria to the historical 75th percentile.\n"
-            "* **Scenario probability:** $\\pi_s \\propto f_s^{\\alpha} s_s^{\\beta} h_s^{\\gamma}$ from "
-            "frequency, severity and impact ratings; expert ratings blend with AI ratings through $\\lambda$.\n"
-            "* **Indicators:** probability weighted robustness $R$, expected tier $\\Phi$, dispersion "
-            "$\\sigma$ and stability index $SI$ place each pathogen in a decision quadrant.\n"
-            "* **Integration:** agent results are combined across agents with agent weights and a second order "
-            "MOSDM pass; an evidence gate withholds criteria that fail readiness checks."
-        )
+            "* **Scenarios:** nine admitted scenarios (S1 to S9) and the unweighted stress test ST1. For the "
+            "seven with a weekly marker, episodes are recounted every week from the CDC series (marker "
+            "weeks joined across interruptions of up to three weeks, at least two weeks long; S4 requires "
+            "three consecutive weeks); S8 and S9 come from the event catalog.\n"
+            "* **Scenario weights of criteria:** each emphasized criterion is multiplied by its observed "
+            "elevation during the scenario's episodes (episode median over window median, never below one); "
+            "experts can replace the profile. Emphasized criteria with a history take their 90th percentile "
+            "as the limit under the scenario; Rt takes 1.\n"
+            "* **Scenario weights:** $\\pi_s = f_s^{\\alpha} v_s^{\\beta} h_s^{\\gamma}$ with "
+            "$f_s = n_s / Y_s$ and severity and impact from experts and the AI assessor blended by "
+            "$\\lambda$; normalized over the weighted scenarios, the baseline outside.\n"
+            "* **Indicators:** expected rank $R$, dominance frequency $\\Phi$, rank dispersion $\\sigma$ and "
+            "stability index $SI$ place each disease in one of four classes.\n"
+            "* **Integration:** the expected ranks of the eight perspectives (Agent 5 reversed) are stratified "
+            "once more with the perspective weights, beside the same run on the baseline ranks.\n"
+            "* **External evidence:** AI retrieved figures pass four checks and are shown to decision makers "
+            "beside the dashboard's values; they never change any number of the method.")
 
     # --- 4. DOMAIN AGENT REFERENCE TABLE ---
     st.markdown("**4. Analytical Domain Architecture (8 Agents)**")
@@ -90,15 +98,16 @@ def render():
     # --- 5. DATA INGESTION & CDC SURVEILLANCE PIPELINE ---
     st.markdown("**5. Automated CDC Surveillance Ingestion Pipeline**")
     st.markdown(
-        "Live surveillance data is automatically paginated from official CDC Socrata open data API endpoints "
-        "every Saturday at 04:00 AM UTC via GitHub Actions, populating `data/Research Data.xlsx`:"
+        "The seven CDC feeds are downloaded in full every Saturday by a GitHub workflow, which also "
+        "recomputes the historical limits, the scenario episodes and the full run, publishes them to the "
+        "repository's data branch read by this app, and archives every week as a release:"
     )
 
     feed_data = [
         {"Surveillance Feed": "Weekly Hospital Respiratory Data", "Endpoint ID": "ua7e-t2fy", "Network / Source": "CDC NHSN", "Target Pathogens": "COVID-19, Influenza, RSV"},
         {"Surveillance Feed": "Emergency Department Visits", "Endpoint ID": "rdmq-nq56", "Network / Source": "CDC NSSP", "Target Pathogens": "COVID-19, Influenza, RSV"},
-        {"Surveillance Feed": "Viral Test Positivity", "Endpoint ID": "seuz-s2cv", "Network / Source": "CDC NREVSS", "Target Pathogens": "COVID-19, Influenza, RSV"},
-        {"Surveillance Feed": "SARS-CoV-2 Wastewater Load", "Endpoint ID": "j9g8-acpt", "Network / Source": "CDC NWSS", "Target Pathogens": "SARS-CoV-2"},
+        {"Surveillance Feed": "Viral Test Positivity", "Endpoint ID": "seuz-s2cv", "Network / Source": "CDC NREVSS", "Target Pathogens": "COVID-19, Influenza, RSV (national only)"},
+        {"Surveillance Feed": "SARS-CoV-2 Wastewater Load", "Endpoint ID": "j9g8-acpt", "Network / Source": "CDC NWSS", "Target Pathogens": "SARS-CoV-2, Michigan sewersheds"},
         {"Surveillance Feed": "Epidemic Trends & Rt Velocity", "Endpoint ID": "5dqz-y4ea", "Network / Source": "CDC CFA", "Target Pathogens": "COVID-19, Influenza, RSV"},
         {"Surveillance Feed": "RESP-NET Hospitalization Rates", "Endpoint ID": "kvib-3txy", "Network / Source": "CDC RESP-NET", "Target Pathogens": "COVID-19, Influenza, RSV"},
         {"Surveillance Feed": "Weekly Notifiable Diseases (NNDSS)", "Endpoint ID": "x9gk-5huc", "Network / Source": "CDC NNDSS", "Target Pathogens": "Meningococcal Disease"}
@@ -108,7 +117,7 @@ def render():
     # --- 6. DATA GOVERNANCE & EVIDENCE BASE ---
     st.markdown("**6. Data Governance & Research Evidence Base**")
     st.markdown(
-        "* **Zero-Imputation Policy:** Missing surveillance inputs are preserved as `NaN` rather than artificially assigned zero to prevent biased policy conclusions.\n"
-        "* **Range Normalization:** Multi-center clinical report ranges (e.g., $41.0\\% - 78.0\\%$) are sanitized to arithmetic midpoints for computational consistency.\n"
+        "* **No imputation:** a missing or stale value stays missing and is excluded with weight renormalization; it is never replaced by zero or an average.\n"
+        "* **Fuzzy evidence:** reported ranges (e.g., $41.0\\% - 78.0\\%$) are interval fuzzy numbers whose graded mean integration representation (the midpoint) enters the method; an upper bound such as $<1\\%$ is the interval from zero to the bound.\n"
         "* **Audit Trail:** Every static baseline figure is linked to a corresponding entry in the Citations index with original publication titles, CDC MMWR numbers, and direct source URLs."
     )

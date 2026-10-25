@@ -4,18 +4,11 @@ import pandas as pd
 from modules.data_cache import read_excel_sheet
 import streamlit as st
 
-DATA_PATHS = [
-    Path(__file__).resolve().parent.parent / "data" / "Research Data.xlsx",
-    Path(__file__).resolve().parent.parent / "Research Data.xlsx",
-    Path("data/Research Data.xlsx"),
-    Path("Research Data.xlsx")
-]
-
 def get_data_filepath() -> Path:
-    for p in DATA_PATHS:
-        if p.exists():
-            return p
-    return DATA_PATHS[0]
+    """Curated sheets: the master workbook when present (Colab), otherwise
+    the curated seed shipped with the repository (web deployment)."""
+    from modules.feeds import curated_path
+    return curated_path()
 
 _PLAIN_NUMBER = re.compile(r"^[-+]?\d*\.?\d+$")
 HARMONIZATION_LOG: list = []

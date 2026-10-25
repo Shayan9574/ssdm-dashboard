@@ -1,39 +1,35 @@
-# Framework Traceability Checklist
+# Traceability: method (thesis Chapter 2, paper Section 4) to code
 
-Maps every section of the methods document (and every box of
-ssdm_workflow_v2.svg) to its implementation. A section is checked only
-when its code is merged, verified, and visible in the dashboard.
-Statuses: DONE, PARTIAL (with what remains), PENDING (checkpoint letter).
+Status at Checkpoint H. Every row is covered by the verification suite in
+`tests/`.
 
-| Methods section | Workflow box | Implementation | Status |
-|---|---|---|---|
-| 1 Overview, four target pathogens | Start / scope | modules/agent_engine.py CORE4 | DONE |
-| 2 Evidence base assembly | Assemble evidence base | data/curated_seed.xlsx + scripts/refresh_data.py | DONE |
-| 3 Data regime typology (Types 1, 2, 3) | Classify by data regime | Data Dictionary sheet + modules/load_data.load_data_dictionary | DONE |
-| 4 Agents O, H, L; recursion; Agent M merge | Route to acquisition agents; Agent M | Agent O and L: refresh_data.py + agent_m_data.py; recursion: launcher staleness loop; RESP-NET full history feed (kvib-3txy) added at C3. Agent H reconciliation display | PARTIAL: reconciliation polish assigned to the review pass |
-| 5 Eight domain agents | Distribute to eight agents | modules/agent_engine.AGENTS + modules/agent_view.py, all eight pages on the shared renderer | DONE |
-| 5 AI enrichment plus Evidence Gate | AI evidence enrichment | Structured retrieval on every agent page; automated four check gate (source, schema and plausibility with scale harmonization, definition audit, independent corroboration); Evidence Ledger sheet persisted to the workbook; validated rows apply as a labeled, toggleable overlay, quarantined rows visible with reasons; baseline never overwritten | DONE |
-| 6 Surveillance pipeline, six feeds, weekly | Live sources | scripts/refresh_data.py + GitHub or launch refresh | DONE |
-| 7.1 Fuzzy chain, GMIR, five term scale | Weight Manager | modules/weight_manager.py gmir, IMPORTANCE_SCALE | DONE |
-| 7.2 Criterion level and agent level modes; multi expert mean | Weight Manager modes | criterion level per agent; agent level W_g elicitation on the SSDM Integration page (four modes) | DONE |
-| 7.3 Four input modes with provenance | Input modes | weight_manager.render_weight_elicitation (default, direct, upload with template, questionnaire with visible fuzzy chain) | DONE |
-| 8 Readiness gate, refine and re run | Readiness diamond | agent_view readiness note + co-equal tier prompt; full gate across registry and scenarios | PARTIAL (C) |
-| 9.1 to 9.8 Updated MOSDM | Run updated MOSDM | modules/mosdm_core.py, verified on Agent 1; guard_min_shared = 1 per decision | DONE |
-| 9.4 SECOND GENERATION: graded attainment, two regime value function, discrimination calibrated anchors theta_j in [0.3, 0.7]; limits hierarchy expert > historical > pool median | Run updated MOSDM | mosdm_core attainment_mode (default graded_calibrated); historical_limits plumbed, populated at checkpoint C | DONE (engine); REMINDER: rewrite methods document Sections 9.3 to 9.5 to the second generation formulation, approved in chat, before submission |
-| 9.3 Expert limits override medians | Acceptable limits | weight_manager.render_limits_editor + engine expert_limits | DONE |
-| 10 Scenario construction from 2016 to 2026 history | Construct scenario set | Scenario Registry curated sheet: nine weighted scenarios (S1 to S9, S4 redefined to sustained Rt above one, S6 provisional) plus the ST1 economic stress test; four converging sources applied; per marker n_s and Y_s recorded | DONE (S6 recomputed on the full RESP-NET history: n_s = 6, Y_s = 8.0) |
-| 11 Probability engine pi_s = f^alpha s^beta h^gamma; fuzzy intensity; lambda = 0.7; baseline outside | Estimate probability | modules/scenario_engine.probability_table (f from registry, s and h expert plus Gemini blend, exponents configurable, normalization over weighted scenarios only) + Scenarios & Probability page audit table | DONE |
-| 12 Scenario wise re runs; AI tier interpretation | Re-run MOSDM per scenario | scenario_engine.run_scenario and tier_matrix; scenario selector on every agent page; ssdm_core.interpret_tiers button on the scenario page | DONE |
-| 13 Stability classification, displacement, trigger, exposure | Stability diamond | scenario_engine.stability_table: robust versus scenario sensitive, displacement with direction, triggers, exposure sum p_s, instability index sum p_s abs delta; stress test excluded | DONE |
-| 14 Indicators R, Phi, sigma, SI | Probability weighted SSDM | ssdm_core.indicators (weighted scenarios only, baseline outside) | DONE |
-| 15 Quadrant classes | Classify by priority and stability | ssdm_core.quadrants, theta configurable, scatter on the Integration page | DONE |
-| 16 Second order matrix, agent weights W_g | Final integration | ssdm_core.second_order (Agent 5 inverted at integration), W_g via Weight Manager agent level scope | DONE |
-| 17 Cross agent SSDM | Apply SSDM across agents | ssdm_core.cross_agent_run: second generation MOSDM on the expected rank matrix, parallel baseline reference run | DONE |
-| 18 Final synthesis (AI, never alters results) | Generate final synthesis | ssdm_core.synthesize on the Integration page, labeled, numbers sourced from the engine only | DONE |
-| 19 Outputs page | Outputs | Overview leads with the final integrated stratification, quadrants, probability mass, signals; downloads on Integration and Evidence pages | DONE |
-| Checkpoint E interface | | Design system (modules/ui.py, theme), seven page navigation with Domain Agents consolidated, persistent context strip, Plotly visualization, Evidence & Data home, Elicitation Studio, mockup approved in chat | DONE |
-| Sensitivity & Simulation (approved addition) | | modules/sensitivity.py + page: parameter sweeps (lambda, exponents) with rank trajectories, Dirichlet Monte Carlo on W_g with tier probabilities and rank distributions, theta sweep, attainment mode comparison | DONE |
-| Standing rule: calculation audit beside every derived number | | Derivations sheet + load_derivations + agent_view expander | DONE |
-| Standing rule: engine provenance label on results | | agent_view ENGINE_BADGE | DONE |
-| Standing rule: co-equal tier asks the user in the dashboard | | agent_view warning prompt with elicitation path | DONE |
-| Full interface rebuild (speed, design) | | | PENDING (E) |
+| Method element | Equation or section | Implementation |
+|---|---|---|
+| Orientation, coverage (observed for at least two alternatives), no imputation | Notation, Orientation, and Coverage | `mosdm_core.run_mosdm` (coverage, unstratified alternatives), `live_subcriteria.active_criteria` |
+| Fuzzy evidence, GMIR | Eq. ch2_gmir | `utils_numeric.parse_fuzzy`, `parse_numeric` (ranges and bounds as interval trapezoids) |
+| Limits hierarchy: expert, historical quantile, pool median (frozen below two observations) | Eq. ch2_limits | `run_mosdm`; history window in `live_subcriteria.window_start` (since 11 May 2023, then five rolling seasons) |
+| Graded attainment, limit position over the pool together with the limit | Eq. ch2_normalize, ch2_attainment | `mosdm_core._orient`, `_graded_degree` |
+| Anchor modes (fixed, calibrated with ties to the midpoint of the bounds, binary) | Eq. ch2_calibrated | `mosdm_core._calibrate_theta`; settings `theta_fixed`, `theta_min`, `theta_max` |
+| Weighted attainment | Eq. ch2_weighted | `run_mosdm` |
+| Tolerance tiers | Eq. ch2_tier | `run_mosdm` (strict, 1e-9 guard) |
+| Dominance guard on informative shared criteria, q_min | Eq. ch2_guard | `mosdm_core._strictly_dominated`; settings `dominance_guard`, `guard_min_shared` |
+| Target, within tier distance (crisp or discretized fuzzy), mid ranks for ties | Eq. ch2_target, ch2_score, ch2_discretize | `run_mosdm`, `MOSDMResult.ranks` |
+| Attainment margin | Eq. ch2_margin | `MOSDMResult.separations` |
+| Audit trail and explanations | Complete Procedure | `IterationRecord`, `MOSDMResult.explanations`; Method Trace page |
+| Scenario as weight profile and limit overrides | Eq. ch2_emphasis (data derived multipliers) | `scenario_engine.scenario_weights`, `emphasis_multipliers`, `data/scenario_emphasis.json` |
+| Admission from documented history, episodes, observable window | Admission from Documented History | `scenario_admission` (weekly markers S1 to S7), `scenario_engine.admission_table` |
+| Tightening at the admission quantile; Rt at 1 | Scenario limit overrides | `scenario_engine.scenario_limit_overrides` |
+| Scenario weights | Eq. ch2_scen_weight, ch2_frequency | `scenario_engine.probability_table` (full precision) |
+| Severity and impact, respondents, assessor blend | Eq. ch2_blend | `scenario_engine._blend`, `set_expert_terms`, `set_ai_assessment` |
+| Re stratification, displacement, exposure, instability | Eq. ch2_displacement to ch2_instability | `scenario_engine.run_scenario`, `stability_table`, `tier_matrix` |
+| Indicators R, Phi, sigma, SI | Eq. ch2_expected_rank to ch2_si | `ssdm_core.indicators` |
+| Typology | Table ch2_typology | `ssdm_core.quadrants` |
+| Second order matrix, reversal, parallel baseline | Eq. ch2_reverse | `ssdm_core.second_order` |
+| Second order stratification with W_g | Second Order Stratification | `ssdm_core.cross_agent_run` |
+| Linguistic chain, scales | Table ch2_scales | `weight_manager.IMPORTANCE_SCALE`, `INTENSITY_SCALE`, `gmir` |
+| Aggregation rules (mean; minimum, geometric means, maximum) | Eq. ch2_aggregate_base | `weight_manager.aggregate_trapezoids`; setting `aggregation_rule` |
+| Input modes and provenance | Input Modes and Provenance | `weight_manager.render_weight_elicitation`, `state` (author and time on every input) |
+| Readiness gate | paper Section 4.4 | `readiness.evaluate` |
+| Sensitivity in the app | Evaluation Protocol (subset) | `sensitivity.py`; the full protocol runs from the experiment scripts |
+| External evidence as information | paper Section 5.4 | `evidence_gate` (never enters the engine) |
+| Weekly data, replay, reproducibility | Temporal Replay | `.github/workflows/weekly-data.yml`, `scripts/refresh_data.py`, `scripts/export_run.py --as-of` |

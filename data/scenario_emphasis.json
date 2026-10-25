@@ -1,0 +1,138 @@
+{
+ "_about": "Criteria emphasized by each scenario, by exact name, per agent. Derived once from the registry's Default Emphasis Keywords and reviewed; edit this file to change a scenario's emphasis. Changes from the keyword expansion: S4 adds Hospitalization Surge Velocity (the registry keyword 'velocity'); S8 adds Target Demographic Uptake (vaccine coverage in the target group).",
+ "scenarios": {
+  "S1": {
+   "A1": [
+    "Annual Incidence Rate (per 100k)",
+    "Annual Hospitalization Rate (per 100k)",
+    "ICU Rate (% of Hosp)",
+    "Current Weekly Hospitalization Rate (per 100k)",
+    "Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",
+    "Current ICU Share of Hospitalized (%)"
+   ],
+   "A2": [
+    "Test Positivity Rate (%)",
+    "Current Test Positivity (%)"
+   ],
+   "A3": [
+    "Annual ED Visit Rate (per 100k)",
+    "Current ED Visit Share (%)",
+    "Hospitalization Surge Velocity (%)"
+   ],
+   "A6": [
+    "Pediatric Hosp Rate (<5)",
+    "Geriatric Hosp Rate (65+)",
+    "Current Pediatric Hospitalization Rate <5 (per 100k)",
+    "Current Geriatric Hospitalization Rate 75+ (per 100k)"
+   ]
+  },
+  "S2": {
+   "A1": [
+    "Annual Hospitalization Rate (per 100k)",
+    "ICU Rate (% of Hosp)",
+    "Current Weekly Hospitalization Rate (per 100k)",
+    "Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",
+    "Current ICU Share of Hospitalized (%)"
+   ],
+   "A3": [
+    "Average Length of Stay (Days)",
+    "Hospitalization Surge Velocity (%)"
+   ],
+   "A6": [
+    "Current Pediatric Hospitalization Rate <5 (per 100k)",
+    "Current Geriatric Hospitalization Rate 75+ (per 100k)"
+   ]
+  },
+  "S3": {
+   "A1": [
+    "Annual Incidence Rate (per 100k)"
+   ],
+   "A2": [
+    "Test Positivity Rate (%)",
+    "Current Test Positivity (%)"
+   ],
+   "A7": [
+    "Effective Reproduction Number (Rt)"
+   ]
+  },
+  "S4": {
+   "A2": [
+    "Basic Reproduction Number (R0)"
+   ],
+   "A3": [
+    "Hospitalization Surge Velocity (%)"
+   ],
+   "A7": [
+    "Effective Reproduction Number (Rt)",
+    "Probability of Outbreak Growth"
+   ]
+  },
+  "S5": {
+   "A1": [
+    "Annual Hospitalization Rate (per 100k)",
+    "ICU Rate (% of Hosp)",
+    "Current Weekly Hospitalization Rate (per 100k)",
+    "Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",
+    "Current ICU Share of Hospitalized (%)"
+   ],
+   "A3": [
+    "Hospitalization Surge Velocity (%)"
+   ],
+   "A6": [
+    "Pediatric Hosp Rate (<5)",
+    "Geriatric Hosp Rate (65+)",
+    "Current Pediatric Hospitalization Rate <5 (per 100k)",
+    "Current Geriatric Hospitalization Rate 75+ (per 100k)"
+   ]
+  },
+  "S6": {
+   "A1": [
+    "Case-Fatality Ratio (%)"
+   ],
+   "A4": [
+    "Severe Complication Rate (%)"
+   ],
+   "A6": [
+    "Geriatric Hosp Rate (65+)",
+    "Current Geriatric Hospitalization Rate 75+ (per 100k)"
+   ]
+  },
+  "S7": {
+   "A1": [
+    "Case-Fatality Ratio (%)"
+   ],
+   "A4": [
+    "Avg Days from Onset to Severe",
+    "Effective Treatment Window (Days)",
+    "Severe Complication Rate (%)"
+   ],
+   "A6": [
+    "Racial Disparity Ratio"
+   ]
+  },
+  "S8": {
+   "A2": [
+    "Natural Infection Seroprevalence (%)"
+   ],
+   "A5": [
+    "Vaccine Available",
+    "Vaccine Effectiveness (%)",
+    "National Vaccine Coverage (%)",
+    "NPI Reduction (%)",
+    "Target Demographic Uptake (%)"
+   ]
+  },
+  "S9": {
+   "A4": [
+    "Effective Treatment Window (Days)",
+    "Standard Treatment Available",
+    "Antimicrobial Resistance Prev (%)"
+   ]
+  },
+  "ST1": {
+   "A8": [
+    "Estimated Annual Direct Medical Cost ($B)"
+   ]
+  }
+ }
+}

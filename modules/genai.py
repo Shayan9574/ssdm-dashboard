@@ -1,4 +1,3 @@
-import json
 import os
 import re
 import requests
@@ -26,29 +25,13 @@ def _post_json(url, headers, payload, timeout=150):
     r.raise_for_status()
     return r.json()
 
-def call_openai_chat(api_key: str, model: str, prompt: str, temperature: float = 0.2):
-    if not api_key:
-        raise ValueError("Missing OpenAI API key.")
-
-    url = "https://api.openai.com/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    payload = {
-        "model": model,
-        "temperature": float(temperature),
-        "messages": [
-            {"role": "system", "content": "You are a public-health decision support analyst. Write clearly for decision-makers."},
-            {"role": "user", "content": prompt},
-        ],
-    }
-    data = _post_json(url, headers, payload, timeout=90)
-    return data["choices"][0]["message"]["content"]
-
 def call_gemini(api_key: str, model: str, prompt: str, temperature: float = 0.2):
     model = normalize_model(model)
     if not api_key:
         raise ValueError("Missing Gemini API key.")
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    # the key travels only in the header, never in the URL (URLs reach logs)
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     headers = {"Content-Type": "application/json", "x-goog-api-key": api_key}
     payload = {
         "generationConfig": {"temperature": float(temperature)},
