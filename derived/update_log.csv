@@ -1,0 +1,34 @@
+Quantity,Item,Previous,Current
+Admission: Y_s,S1,4.0629705681040384,4.082135523613963
+Admission: f_s,S1,0.7383760107816711,0.7349094567404427
+Admission: Y_s,S2,6.209445585215605,6.228610540725531
+Admission: f_s,S2,0.6441798941798942,0.6421978021978022
+Admission: n_s,S4,6.0,5.0
+Admission: Y_s,S4,1.7,1.7056810403832992
+Admission: f_s,S4,3.5294117647058822,2.9313804173354736
+Admission: Y_s,S6,8.049281314168377,8.068446269678303
+Admission: f_s,S6,0.7454081632653061,0.7436375975568374
+Admission: Y_s,S7,4.791238877481177,4.810403832991102
+Admission: f_s,S7,1.0435714285714286,1.0394137734775186
+Admission: f_s,ST1,,
+Probabilities: p_s,S1,0.0864668770494551,0.0926745778631136
+Probabilities: p_s,S2,0.0754361231871789,0.0809833234249977
+Probabilities: p_s,S3,0.0900800965558478,0.0970026119053703
+Probabilities: p_s,S4,0.4133086783150667,0.3696570240607341
+Probabilities: p_s,S5,0.0900800965558479,0.0970026119053703
+Probabilities: p_s,S6,0.0872903711165928,0.0937752260562622
+Probabilities: p_s,S7,0.1222065195632299,0.1310736061410571
+Probabilities: p_s,S8,0.0117104125522602,0.0126103395476981
+Probabilities: p_s,S9,0.0234208251045204,0.0252206790953962
+Probabilities: p_s,ST1,,
+Historical_Stats: p50,Current Weekly Hospitalization Rate (per 100k),0.855,0.86
+Historical_Stats: p90,Current Weekly Hospitalization Rate (per 100k),4.744999999999999,4.73
+Historical_Stats: p50,Current ICU Share of Hospitalized (%),15.2,15.185
+Historical_Stats: p90,Current ICU Share of Hospitalized (%),20.76,20.735
+Historical_Stats: p90,Current Test Positivity (%),13.040000000000004,13.010000000000002
+Historical_Stats: p50,Hospitalization Surge Velocity (%),-5.000000000000004,-4.772727272727277
+Historical_Stats: p90,Hospitalization Surge Velocity (%),52.33954451345757,52.95103957075789
+Historical_Stats: p50,Current Pediatric Hospitalization Rate <5 (per 100k),1.28,1.285
+Historical_Stats: p90,Current Pediatric Hospitalization Rate <5 (per 100k),8.896,8.856000000000012
+Historical_Stats: p50,Current Geriatric Hospitalization Rate 75+ (per 100k),3.86,3.89
+Historical_Stats: p90,Current Geriatric Hospitalization Rate 75+ (per 100k),19.59800000000001,19.529000000000003

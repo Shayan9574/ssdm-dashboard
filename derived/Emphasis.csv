@@ -1,0 +1,62 @@
+Scenario,Agent,Criterion,Elevation ratio,Multiplier k,Basis
+S1,A1,Annual Incidence Rate (per 100k),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A1,Annual Hospitalization Rate (per 100k),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A1,ICU Rate (% of Hosp),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A1,Current Weekly Hospitalization Rate (per 100k),5.46078431372549,5.46078431372549,own history: median over 55 episode values / median over 583 window values
+S1,A1,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",1.236760124610592,1.236760124610592,own history: median over 51 episode values / median over 558 window values
+S1,A1,Current ICU Share of Hospitalized (%),0.9740173217854763,1.0,"own history: median over 55 episode values / median over 576 window values (ratio below one, floored at one)"
+S1,A2,Test Positivity Rate (%),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A2,Current Test Positivity (%),2.945945945945946,2.945945945945946,own history: median over 63 episode values / median over 636 window values
+S1,A3,Annual ED Visit Rate (per 100k),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A3,Current ED Visit Share (%),3.822222222222222,3.822222222222222,own history: median over 63 episode values / median over 636 window values
+S1,A3,Hospitalization Surge Velocity (%),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A6,Pediatric Hosp Rate (<5),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A6,Geriatric Hosp Rate (65+),3.6179039301310043,3.6179039301310043,scenario marker (NSSP combined respiratory ED share): criterion has no ratio scale weekly history
+S1,A6,Current Pediatric Hospitalization Rate <5 (per 100k),3.751824817518248,3.751824817518248,own history: median over 39 episode values / median over 424 window values
+S1,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),6.455012853470437,6.455012853470437,own history: median over 27 episode values / median over 318 window values
+S2,A1,Annual Hospitalization Rate (per 100k),3.9926362297496323,3.9926362297496323,scenario marker (NHSN combined admissions per 100k): criterion has no ratio scale weekly history
+S2,A1,ICU Rate (% of Hosp),3.9926362297496323,3.9926362297496323,scenario marker (NHSN combined admissions per 100k): criterion has no ratio scale weekly history
+S2,A1,Current Weekly Hospitalization Rate (per 100k),4.186274509803921,4.186274509803921,own history: median over 77 episode values / median over 807 window values
+S2,A1,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",1.0623052959501558,1.0623052959501558,own history: median over 55 episode values / median over 732 window values
+S2,A1,Current ICU Share of Hospitalized (%),1.185,1.185,own history: median over 77 episode values / median over 791 window values
+S2,A3,Average Length of Stay (Days),3.9926362297496323,3.9926362297496323,scenario marker (NHSN combined admissions per 100k): criterion has no ratio scale weekly history
+S2,A3,Hospitalization Surge Velocity (%),3.9926362297496323,3.9926362297496323,scenario marker (NHSN combined admissions per 100k): criterion has no ratio scale weekly history
+S2,A6,Current Pediatric Hospitalization Rate <5 (per 100k),5.138364779874213,5.138364779874213,own history: median over 27 episode values / median over 462 window values
+S2,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),6.455012853470437,6.455012853470437,own history: median over 21 episode values / median over 318 window values
+S3,A1,Annual Incidence Rate (per 100k),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S3,A2,Test Positivity Rate (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S3,A2,Current Test Positivity (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S3,A7,Effective Reproduction Number (Rt),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S4,A2,Basic Reproduction Number (R0),1.0978541625273197,1.0978541625273197,"scenario marker (weekly Rt, maximum over pathogens): criterion has no ratio scale weekly history"
+S4,A3,Hospitalization Surge Velocity (%),1.0978541625273197,1.0978541625273197,"scenario marker (weekly Rt, maximum over pathogens): criterion has no ratio scale weekly history"
+S4,A7,Effective Reproduction Number (Rt),1.103441127694859,1.103441127694859,own history: median over 95 episode values / median over 198 window values
+S4,A7,Probability of Outbreak Growth,3.5069544364508394,3.5069544364508394,own history: median over 95 episode values / median over 198 window values
+S5,A1,Annual Hospitalization Rate (per 100k),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A1,ICU Rate (% of Hosp),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A1,Current Weekly Hospitalization Rate (per 100k),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A1,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A1,Current ICU Share of Hospitalized (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A3,Hospitalization Surge Velocity (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A6,Pediatric Hosp Rate (<5),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A6,Geriatric Hosp Rate (65+),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A6,Current Pediatric Hospitalization Rate <5 (per 100k),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S5,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S6,A1,Case-Fatality Ratio (%),3.7735849056603774,3.7735849056603774,scenario marker (RESP-NET combined 65+ weekly rate): criterion has no ratio scale weekly history
+S6,A4,Severe Complication Rate (%),3.7735849056603774,3.7735849056603774,scenario marker (RESP-NET combined 65+ weekly rate): criterion has no ratio scale weekly history
+S6,A6,Geriatric Hosp Rate (65+),3.7735849056603774,3.7735849056603774,scenario marker (RESP-NET combined 65+ weekly rate): criterion has no ratio scale weekly history
+S6,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),6.372750642673522,6.372750642673522,own history: median over 30 episode values / median over 318 window values
+S7,A1,Case-Fatality Ratio (%),2.6666666666666665,2.6666666666666665,scenario marker (NNDSS weekly meningococcal cases): criterion has no ratio scale weekly history
+S7,A4,Avg Days from Onset to Severe,2.6666666666666665,2.6666666666666665,scenario marker (NNDSS weekly meningococcal cases): criterion has no ratio scale weekly history
+S7,A4,Effective Treatment Window (Days),2.6666666666666665,2.6666666666666665,scenario marker (NNDSS weekly meningococcal cases): criterion has no ratio scale weekly history
+S7,A4,Severe Complication Rate (%),2.6666666666666665,2.6666666666666665,scenario marker (NNDSS weekly meningococcal cases): criterion has no ratio scale weekly history
+S7,A6,Racial Disparity Ratio,2.6666666666666665,2.6666666666666665,scenario marker (NNDSS weekly meningococcal cases): criterion has no ratio scale weekly history
+S8,A2,Natural Infection Seroprevalence (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S8,A5,Vaccine Available,1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S8,A5,Vaccine Effectiveness (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S8,A5,National Vaccine Coverage (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S8,A5,NPI Reduction (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S8,A5,Target Demographic Uptake (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S9,A4,Effective Treatment Window (Days),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S9,A4,Standard Treatment Available,1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+S9,A4,Antimicrobial Resistance Prev (%),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario
+ST1,A8,Estimated Annual Direct Medical Cost ($B),1.0,1.0,no weekly marker series (event catalog or stress test): baseline weight kept until experts weight this scenario

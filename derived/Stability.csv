@@ -1,0 +1,33 @@
+Disease,Baseline tier,Classification,Triggers (scenario: displacement),Exposure E,Instability I,Agent
+Influenza,1,Scenario sensitive,S2: +2; S5: +1; S6: +3; S7: +3,0.4028347675276875,0.9335157553473241,A1
+Meningococcal Disease (Meningitis),1,Robust priority,none,0.0,0.0,A1
+COVID-19,2,Scenario sensitive,S1: -1; S6: +1; S7: +1,0.317523410060433,0.317523410060433,A1
+Respiratory Syncytial Virus (RSV),2,Robust priority,none,0.0,0.0,A1
+COVID-19,1,Robust priority,none,0.0,0.0,A2
+Influenza,1,Scenario sensitive,S3: +1,0.09700261190537034,0.09700261190537034,A2
+Respiratory Syncytial Virus (RSV),1,Scenario sensitive,S1: +1,0.09267457786311363,0.09267457786311363,A2
+Meningococcal Disease (Meningitis),2,Scenario sensitive,S1: +1; S3: +1,0.18967718976848397,0.18967718976848397,A2
+Respiratory Syncytial Virus (RSV),1,Scenario sensitive,S2: +1,0.08098332342499776,0.08098332342499776,A3
+Meningococcal Disease (Meningitis),1,Scenario sensitive,S1: +1,0.09267457786311363,0.09267457786311363,A3
+Influenza,2,Scenario sensitive,S1: +1; S2: +1,0.17365790128811137,0.17365790128811137,A3
+COVID-19,3,Scenario sensitive,S1: +1; S2: +1,0.17365790128811137,0.17365790128811137,A3
+Respiratory Syncytial Virus (RSV),1,Scenario sensitive,S7: +2,0.13107360614105715,0.2621472122821143,A4
+Meningococcal Disease (Meningitis),1,Scenario sensitive,S6: +1,0.09377522605626223,0.09377522605626223,A4
+Influenza,2,Scenario sensitive,S6: +1,0.09377522605626223,0.09377522605626223,A4
+COVID-19,3,Scenario sensitive,S6: +1; S7: +1,0.22484883219731938,0.22484883219731938,A4
+Meningococcal Disease (Meningitis),1,Robust priority,none,0.0,0.0,A5
+Influenza,2,Robust priority,none,0.0,0.0,A5
+Respiratory Syncytial Virus (RSV),3,Robust priority,none,0.0,0.0,A5
+COVID-19,4,Robust priority,none,0.0,0.0,A5
+Respiratory Syncytial Virus (RSV),1,Scenario sensitive,S6: +1,0.09377522605626223,0.09377522605626223,A6
+Influenza,1,Scenario sensitive,S7: +1,0.13107360614105715,0.13107360614105715,A6
+COVID-19,2,Scenario sensitive,S2: -1; S7: +1,0.2120569295660549,0.2120569295660549,A6
+Meningococcal Disease (Meningitis),3,Scenario sensitive,S2: -1; S5: -1; S7: -1,0.3090595414714252,0.3090595414714252,A6
+COVID-19,1,Robust priority,none,0.0,0.0,A7
+Influenza,1,Robust priority,none,0.0,0.0,A7
+Respiratory Syncytial Virus (RSV),1,Robust priority,none,0.0,0.0,A7
+Meningococcal Disease (Meningitis),2,Robust priority,none,0.0,0.0,A7
+COVID-19,1,Robust priority,none,0.0,0.0,A8
+Influenza,2,Robust priority,none,0.0,0.0,A8
+Respiratory Syncytial Virus (RSV),3,Robust priority,none,0.0,0.0,A8
+Meningococcal Disease (Meningitis),4,Robust priority,none,0.0,0.0,A8

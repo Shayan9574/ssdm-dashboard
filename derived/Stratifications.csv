@@ -1,0 +1,353 @@
+Agent,Environment,Disease,Tier,Rank,S_i,K_i at the iteration forming its tier,Target,Weights,Limits
+A1,Baseline,Influenza,1,1.0,0.0,0.5461439769278853,True,default,default
+A1,Baseline,Meningococcal Disease (Meningitis),1,2.0,0.9499712478435881,0.5,False,default,default
+A1,Baseline,COVID-19,2,3.0,0.0,0.43341708542713564,True,default,default
+A1,Baseline,Respiratory Syncytial Virus (RSV),2,4.0,0.9999999999999998,0.42857142857142855,False,default,default
+A1,S1,Influenza,1,1.0,0.0,0.34971103980210133,True,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S1,COVID-19,1,2.0,0.2405479731603192,0.3660371787478149,False,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S1,Meningococcal Disease (Meningitis),1,3.0,0.9389223486290851,0.38957450727574144,False,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S1,Respiratory Syncytial Virus (RSV),2,4.0,0.0,0.23619474248132166,True,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S2,Meningococcal Disease (Meningitis),1,1.0,0.0,0.5,True,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S2,COVID-19,2,2.0,0.0,0.3696831966670233,True,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S2,Respiratory Syncytial Virus (RSV),2,3.0,0.694829600905993,0.3246646100770725,False,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S2,Influenza,3,4.0,0.0,0.3040794903986912,True,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S3,Influenza,1,1.0,0.0,0.5461439769278853,True,data derived emphasis on default baseline weights,default
+A1,S3,Meningococcal Disease (Meningitis),1,2.0,0.9499712478435881,0.5,False,data derived emphasis on default baseline weights,default
+A1,S3,COVID-19,2,3.0,0.0,0.43341708542713564,True,data derived emphasis on default baseline weights,default
+A1,S3,Respiratory Syncytial Virus (RSV),2,4.0,0.9999999999999998,0.42857142857142855,False,data derived emphasis on default baseline weights,default
+A1,S4,Influenza,1,1.0,0.0,0.5461439769278853,True,data derived emphasis on default baseline weights,default
+A1,S4,Meningococcal Disease (Meningitis),1,2.0,0.9499712478435881,0.5,False,data derived emphasis on default baseline weights,default
+A1,S4,COVID-19,2,3.0,0.0,0.43341708542713564,True,data derived emphasis on default baseline weights,default
+A1,S4,Respiratory Syncytial Virus (RSV),2,4.0,0.9999999999999998,0.42857142857142855,False,data derived emphasis on default baseline weights,default
+A1,S5,Meningococcal Disease (Meningitis),1,1.0,0.0,0.5,True,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S5,Influenza,2,2.0,0.0,0.23299246089033554,True,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S5,COVID-19,2,3.0,0.45432066823355466,0.2819878307956563,False,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S5,Respiratory Syncytial Virus (RSV),2,4.0,0.9421999721582357,0.3264597997422425,False,data derived emphasis on default baseline weights,default; scenario tightening on 3 criterion(a)
+A1,S6,Meningococcal Disease (Meningitis),1,1.0,0.0,0.7047353760445683,True,data derived emphasis on default baseline weights,default
+A1,S6,Respiratory Syncytial Virus (RSV),2,2.0,0.0,0.5907335907335908,True,data derived emphasis on default baseline weights,default
+A1,S6,COVID-19,3,3.0,0.0,0.6625229444901577,True,data derived emphasis on default baseline weights,default
+A1,S6,Influenza,4,4.0,0.0,0.30694980694980695,True,data derived emphasis on default baseline weights,default
+A1,S7,Meningococcal Disease (Meningitis),1,1.0,0.0,0.6470588235294118,True,data derived emphasis on default baseline weights,default
+A1,S7,Respiratory Syncytial Virus (RSV),2,2.0,0.0,0.5384615384615385,True,data derived emphasis on default baseline weights,default
+A1,S7,COVID-19,3,3.0,0.0,0.6194199243379572,True,data derived emphasis on default baseline weights,default
+A1,S7,Influenza,4,4.0,0.0,0.34615384615384615,True,data derived emphasis on default baseline weights,default
+A1,S8,Influenza,1,1.0,0.0,0.5461439769278853,True,data derived emphasis on default baseline weights,default
+A1,S8,Meningococcal Disease (Meningitis),1,2.0,0.9499712478435881,0.5,False,data derived emphasis on default baseline weights,default
+A1,S8,COVID-19,2,3.0,0.0,0.43341708542713564,True,data derived emphasis on default baseline weights,default
+A1,S8,Respiratory Syncytial Virus (RSV),2,4.0,0.9999999999999998,0.42857142857142855,False,data derived emphasis on default baseline weights,default
+A1,S9,Influenza,1,1.0,0.0,0.5461439769278853,True,data derived emphasis on default baseline weights,default
+A1,S9,Meningococcal Disease (Meningitis),1,2.0,0.9499712478435881,0.5,False,data derived emphasis on default baseline weights,default
+A1,S9,COVID-19,2,3.0,0.0,0.43341708542713564,True,data derived emphasis on default baseline weights,default
+A1,S9,Respiratory Syncytial Virus (RSV),2,4.0,0.9999999999999998,0.42857142857142855,False,data derived emphasis on default baseline weights,default
+A1,ST1,Influenza,1,1.0,0.0,0.5461439769278853,True,data derived emphasis on default baseline weights,default
+A1,ST1,Meningococcal Disease (Meningitis),1,2.0,0.9499712478435881,0.5,False,data derived emphasis on default baseline weights,default
+A1,ST1,COVID-19,2,3.0,0.0,0.43341708542713564,True,data derived emphasis on default baseline weights,default
+A1,ST1,Respiratory Syncytial Virus (RSV),2,4.0,0.9999999999999998,0.42857142857142855,False,data derived emphasis on default baseline weights,default
+A2,Baseline,COVID-19,1,1.0,0.0,0.566572571159727,True,default,default
+A2,Baseline,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,default,default
+A2,Baseline,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,default,default
+A2,Baseline,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,default,default
+A2,S1,Influenza,1,1.0,0.0,0.46458233071490335,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S1,COVID-19,1,2.0,0.5334707754615937,0.3775853863248269,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S1,Respiratory Syncytial Virus (RSV),2,3.0,0.0,0.378649833812809,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S1,Meningococcal Disease (Meningitis),3,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S2,COVID-19,1,1.0,0.0,0.566572571159727,True,data derived emphasis on default baseline weights,default
+A2,S2,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,data derived emphasis on default baseline weights,default
+A2,S2,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default
+A2,S2,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A2,S3,COVID-19,1,1.0,0.0,0.5105974287683996,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S3,Respiratory Syncytial Virus (RSV),1,2.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S3,Influenza,2,3.0,0.0,0.6000000000000001,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S3,Meningococcal Disease (Meningitis),3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A2,S4,COVID-19,1,1.0,0.0,0.5735279159310352,True,data derived emphasis on default baseline weights,default
+A2,S4,Influenza,1,2.0,0.6293987779577729,0.48120157012801273,False,data derived emphasis on default baseline weights,default
+A2,S4,Respiratory Syncytial Virus (RSV),1,3.0,0.6690774849237754,0.4254292881970288,False,data derived emphasis on default baseline weights,default
+A2,S4,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A2,S5,COVID-19,1,1.0,0.0,0.566572571159727,True,data derived emphasis on default baseline weights,default
+A2,S5,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,data derived emphasis on default baseline weights,default
+A2,S5,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default
+A2,S5,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A2,S6,COVID-19,1,1.0,0.0,0.566572571159727,True,data derived emphasis on default baseline weights,default
+A2,S6,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,data derived emphasis on default baseline weights,default
+A2,S6,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default
+A2,S6,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A2,S7,COVID-19,1,1.0,0.0,0.566572571159727,True,data derived emphasis on default baseline weights,default
+A2,S7,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,data derived emphasis on default baseline weights,default
+A2,S7,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default
+A2,S7,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A2,S8,COVID-19,1,1.0,0.0,0.566572571159727,True,data derived emphasis on default baseline weights,default
+A2,S8,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,data derived emphasis on default baseline weights,default
+A2,S8,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default
+A2,S8,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A2,S9,COVID-19,1,1.0,0.0,0.566572571159727,True,data derived emphasis on default baseline weights,default
+A2,S9,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,data derived emphasis on default baseline weights,default
+A2,S9,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default
+A2,S9,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A2,ST1,COVID-19,1,1.0,0.0,0.566572571159727,True,data derived emphasis on default baseline weights,default
+A2,ST1,Influenza,1,2.0,0.6221458035148643,0.49061908545835436,False,data derived emphasis on default baseline weights,default
+A2,ST1,Respiratory Syncytial Virus (RSV),1,3.0,0.6670382015324412,0.42619809270883624,False,data derived emphasis on default baseline weights,default
+A2,ST1,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A3,Baseline,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,default,default
+A3,Baseline,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,default,default
+A3,Baseline,Influenza,2,3.0,0.0,1.0,True,default,default
+A3,Baseline,COVID-19,3,4.0,0.0,0.3333333333333333,True,default,default
+A3,S1,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6328067190627348,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A3,S1,Meningococcal Disease (Meningitis),2,2.0,0.0,0.216548463356974,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A3,S1,Influenza,3,3.0,0.0,0.2577873683841951,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A3,S1,COVID-19,4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A3,S2,Meningococcal Disease (Meningitis),1,1.0,0.0,0.7997050147492626,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S2,Respiratory Syncytial Virus (RSV),2,2.0,0.0,0.8998525073746312,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S2,Influenza,3,3.0,0.0,0.6637096364275824,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S2,COVID-19,4,4.0,0.0,0.11129323061793149,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S3,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,data derived emphasis on default baseline weights,default
+A3,S3,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default
+A3,S3,Influenza,2,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A3,S3,COVID-19,3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A3,S4,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6082326647722172,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S4,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S4,Influenza,2,3.0,0.0,0.7317933051176655,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S4,COVID-19,3,4.0,0.0,0.32280409197319054,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S5,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S5,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S5,Influenza,2,3.0,0.0,0.7477305412325932,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S5,COVID-19,3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A3,S6,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,data derived emphasis on default baseline weights,default
+A3,S6,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default
+A3,S6,Influenza,2,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A3,S6,COVID-19,3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A3,S7,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,data derived emphasis on default baseline weights,default
+A3,S7,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default
+A3,S7,Influenza,2,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A3,S7,COVID-19,3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A3,S8,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,data derived emphasis on default baseline weights,default
+A3,S8,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default
+A3,S8,Influenza,2,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A3,S8,COVID-19,3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A3,S9,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,data derived emphasis on default baseline weights,default
+A3,S9,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default
+A3,S9,Influenza,2,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A3,S9,COVID-19,3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A3,ST1,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5986486486486486,True,data derived emphasis on default baseline weights,default
+A3,ST1,Meningococcal Disease (Meningitis),1,2.0,0.8773584905660377,0.5,False,data derived emphasis on default baseline weights,default
+A3,ST1,Influenza,2,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A3,ST1,COVID-19,3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A4,Baseline,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,default,default
+A4,Baseline,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,default,default
+A4,Baseline,Influenza,2,3.0,0.0,0.7500000000000001,True,default,default
+A4,Baseline,COVID-19,3,4.0,0.0,0.4,True,default,default
+A4,S1,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,S1,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,S1,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,S1,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A4,S2,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,S2,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,S2,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,S2,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A4,S3,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,S3,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,S3,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,S3,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A4,S4,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,S4,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,S4,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,S4,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A4,S5,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,S5,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,S5,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,S5,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A4,S6,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6889920045688178,True,data derived emphasis on default baseline weights,default
+A4,S6,Meningococcal Disease (Meningitis),2,2.0,0.0,0.9099514563106796,True,data derived emphasis on default baseline weights,default
+A4,S6,Influenza,3,3.0,0.0,0.75,True,data derived emphasis on default baseline weights,default
+A4,S6,COVID-19,4,4.0,0.0,0.25728155339805825,True,data derived emphasis on default baseline weights,default
+A4,S7,Meningococcal Disease (Meningitis),1,1.0,0.0,0.6733333333333333,True,data derived emphasis on default baseline weights,default
+A4,S7,Influenza,2,2.0,0.0,0.7681818181818182,True,data derived emphasis on default baseline weights,default
+A4,S7,Respiratory Syncytial Virus (RSV),3,3.0,0.0,0.6333333333333333,True,data derived emphasis on default baseline weights,default
+A4,S7,COVID-19,4,4.0,0.0,0.3666666666666667,True,data derived emphasis on default baseline weights,default
+A4,S8,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,S8,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,S8,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,S8,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A4,S9,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,S9,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,S9,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,S9,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A4,ST1,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.5164705882352941,True,data derived emphasis on default baseline weights,default
+A4,ST1,Meningococcal Disease (Meningitis),1,2.0,0.6529483135161369,0.5800000000000001,False,data derived emphasis on default baseline weights,default
+A4,ST1,Influenza,2,3.0,0.0,0.7500000000000001,True,data derived emphasis on default baseline weights,default
+A4,ST1,COVID-19,3,4.0,0.0,0.4,True,data derived emphasis on default baseline weights,default
+A5,Baseline,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,default,default
+A5,Baseline,Influenza,2,2.0,0.0,0.8600000000000001,True,default,default
+A5,Baseline,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,default,default
+A5,Baseline,COVID-19,4,4.0,0.0,0.2,True,default,default
+A5,S1,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S1,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S1,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S1,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S2,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S2,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S2,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S2,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S3,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S3,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S3,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S3,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S4,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S4,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S4,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S4,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S5,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S5,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S5,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S5,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S6,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S6,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S6,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S6,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S7,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S7,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S7,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S7,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S8,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S8,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S8,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S8,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,S9,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,S9,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,S9,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,S9,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A5,ST1,Meningococcal Disease (Meningitis),1,1.0,0.0,0.9761363636363635,True,data derived emphasis on default baseline weights,default
+A5,ST1,Influenza,2,2.0,0.0,0.8600000000000001,True,data derived emphasis on default baseline weights,default
+A5,ST1,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A5,ST1,COVID-19,4,4.0,0.0,0.2,True,data derived emphasis on default baseline weights,default
+A6,Baseline,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6531121020429327,True,default,default
+A6,Baseline,Influenza,1,2.0,0.7335181539926079,0.547334260227998,False,default,default
+A6,Baseline,COVID-19,2,3.0,0.0,0.6000000000000001,True,default,default
+A6,Baseline,Meningococcal Disease (Meningitis),3,4.0,0.0,0.3333333333333333,True,default,default
+A6,S1,Influenza,1,1.0,0.0,0.2967169328905383,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S1,Respiratory Syncytial Virus (RSV),1,2.0,0.7272036277000526,0.31312431198776897,False,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S1,COVID-19,2,3.0,0.0,0.39234110138922734,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S1,Meningococcal Disease (Meningitis),3,4.0,0.0,0.12142099681866383,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S2,Influenza,1,1.0,0.0,0.14535834500675093,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S2,COVID-19,1,2.0,0.1872275997118949,0.11213253375031945,False,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S2,Respiratory Syncytial Virus (RSV),1,3.0,0.7650798044682783,0.17365549190265647,False,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S2,Meningococcal Disease (Meningitis),2,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S3,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6531121020429327,True,data derived emphasis on default baseline weights,default
+A6,S3,Influenza,1,2.0,0.7335181539926079,0.547334260227998,False,data derived emphasis on default baseline weights,default
+A6,S3,COVID-19,2,3.0,0.0,0.6000000000000001,True,data derived emphasis on default baseline weights,default
+A6,S3,Meningococcal Disease (Meningitis),3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A6,S4,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6531121020429327,True,data derived emphasis on default baseline weights,default
+A6,S4,Influenza,1,2.0,0.7335181539926079,0.547334260227998,False,data derived emphasis on default baseline weights,default
+A6,S4,COVID-19,2,3.0,0.0,0.6000000000000001,True,data derived emphasis on default baseline weights,default
+A6,S4,Meningococcal Disease (Meningitis),3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A6,S5,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.4635691121126461,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S5,Influenza,1,2.0,0.7335181539926079,0.3028824861881775,False,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S5,COVID-19,2,3.0,0.0,0.4,True,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S5,Meningococcal Disease (Meningitis),2,4.0,1.0,0.3333333333333333,False,data derived emphasis on default baseline weights,default; scenario tightening on 2 criterion(a)
+A6,S6,Influenza,1,1.0,0.0,0.4014071478079959,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A6,S6,COVID-19,2,2.0,0.0,0.3625482158797355,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A6,S6,Respiratory Syncytial Virus (RSV),2,3.0,0.7646278715667312,0.31431386004914436,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A6,S6,Meningococcal Disease (Meningitis),3,4.0,0.0,0.17320261437908496,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A6,S7,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.7398340765321995,True,data derived emphasis on default baseline weights,default
+A6,S7,Meningococcal Disease (Meningitis),2,2.0,0.0,0.5714285714285714,True,data derived emphasis on default baseline weights,default
+A6,S7,Influenza,2,3.0,0.8601142373627207,0.5925641025641025,False,data derived emphasis on default baseline weights,default
+A6,S7,COVID-19,3,4.0,0.0,0.44999999999999996,True,data derived emphasis on default baseline weights,default
+A6,S8,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6531121020429327,True,data derived emphasis on default baseline weights,default
+A6,S8,Influenza,1,2.0,0.7335181539926079,0.547334260227998,False,data derived emphasis on default baseline weights,default
+A6,S8,COVID-19,2,3.0,0.0,0.6000000000000001,True,data derived emphasis on default baseline weights,default
+A6,S8,Meningococcal Disease (Meningitis),3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A6,S9,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6531121020429327,True,data derived emphasis on default baseline weights,default
+A6,S9,Influenza,1,2.0,0.7335181539926079,0.547334260227998,False,data derived emphasis on default baseline weights,default
+A6,S9,COVID-19,2,3.0,0.0,0.6000000000000001,True,data derived emphasis on default baseline weights,default
+A6,S9,Meningococcal Disease (Meningitis),3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A6,ST1,Respiratory Syncytial Virus (RSV),1,1.0,0.0,0.6531121020429327,True,data derived emphasis on default baseline weights,default
+A6,ST1,Influenza,1,2.0,0.7335181539926079,0.547334260227998,False,data derived emphasis on default baseline weights,default
+A6,ST1,COVID-19,2,3.0,0.0,0.6000000000000001,True,data derived emphasis on default baseline weights,default
+A6,ST1,Meningococcal Disease (Meningitis),3,4.0,0.0,0.3333333333333333,True,data derived emphasis on default baseline weights,default
+A7,Baseline,COVID-19,1,2.0,0.0,0.3,True,default,default
+A7,Baseline,Influenza,1,2.0,0.0,0.3,False,default,default
+A7,Baseline,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,default,default
+A7,Baseline,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,default,default
+A7,S1,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,S1,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S1,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S1,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A7,S2,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,S2,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S2,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S2,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A7,S3,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S3,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S3,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S3,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S4,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S4,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S4,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S4,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default; scenario tightening on 1 criterion(a)
+A7,S5,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,S5,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S5,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S5,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A7,S6,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,S6,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S6,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S6,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A7,S7,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,S7,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S7,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S7,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A7,S8,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,S8,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S8,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S8,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A7,S9,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,S9,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S9,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,S9,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A7,ST1,COVID-19,1,2.0,0.0,0.3,True,data derived emphasis on default baseline weights,default
+A7,ST1,Influenza,1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,ST1,Respiratory Syncytial Virus (RSV),1,2.0,0.0,0.3,False,data derived emphasis on default baseline weights,default
+A7,ST1,Meningococcal Disease (Meningitis),2,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,Baseline,COVID-19,1,1.0,0.0,1.0,True,default,default
+A8,Baseline,Influenza,2,2.0,0.0,0.9999999999999998,True,default,default
+A8,Baseline,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,default,default
+A8,Baseline,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,default,default
+A8,S1,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S1,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S1,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S1,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S2,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S2,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S2,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S2,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S3,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S3,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S3,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S3,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S4,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S4,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S4,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S4,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S5,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S5,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S5,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S5,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S6,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S6,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S6,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S6,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S7,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S7,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S7,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S7,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S8,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S8,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S8,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S8,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,S9,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S9,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,S9,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,S9,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default
+A8,ST1,COVID-19,1,1.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,ST1,Influenza,2,2.0,0.0,0.9999999999999998,True,data derived emphasis on default baseline weights,default
+A8,ST1,Respiratory Syncytial Virus (RSV),3,3.0,0.0,1.0,True,data derived emphasis on default baseline weights,default
+A8,ST1,Meningococcal Disease (Meningitis),4,4.0,0.0,0.0,True,data derived emphasis on default baseline weights,default

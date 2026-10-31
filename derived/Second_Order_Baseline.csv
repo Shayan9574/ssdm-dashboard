@@ -1,0 +1,5 @@
+Disease,Agent 1,Agent 2,Agent 3,Agent 4,Agent 5,Agent 6,Agent 7,Agent 8
+Influenza,1.0,2.0,3.0,3.0,3.0,2.0,2.0,2.0
+COVID-19,3.0,1.0,4.0,4.0,1.0,3.0,2.0,1.0
+Respiratory Syncytial Virus (RSV),4.0,3.0,1.0,1.0,2.0,1.0,2.0,3.0
+Meningococcal Disease (Meningitis),2.0,4.0,2.0,2.0,4.0,4.0,4.0,4.0

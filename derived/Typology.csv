@@ -1,0 +1,33 @@
+Disease,Baseline rank,Baseline tier,R (expected rank),Phi (top tier prob.),sigma (dispersion),SI (stability),Quadrant,Agent
+Influenza,1.0,1,2.014499078772322,0.5971652324723126,1.3491788731211052,0.10054741791926325,Conditionally critical,A1
+Meningococcal Disease (Meningitis),2.0,1,1.6898398103354262,1.0,0.6319098053820946,0.5787267964119369,Conditionally critical,A1
+COVID-19,3.0,2,2.826342098711889,0.09267457786311363,0.37881504010310885,0.7474566399312608,Stable low priority,A1
+Respiratory Syncytial Virus (RSV),4.0,2,3.4693190121803634,0.0,0.8359164679446447,0.44272235470357024,Latent risk,A1
+COVID-19,1.0,1,1.0926745778631137,1.0,0.28997586189372265,0.8066827587375183,Structural priority,A2
+Influenza,2.0,1,2.0043280340422567,0.9029973880946297,0.435497942463352,0.7096680383577654,Structural priority,A2
+Respiratory Syncytial Virus (RSV),3.0,1,2.90299738809463,0.9073254221368864,0.29596132380584195,0.8026924507961054,Stable low priority,A2
+Meningococcal Disease (Meningitis),4.0,2,4.0,0.0,0.0,1.0,Stable low priority,A2
+Respiratory Syncytial Virus (RSV),1.0,1,1.0809833234249977,0.9190166765750023,0.27280950267914045,0.8181269982139063,Structural priority,A3
+Meningococcal Disease (Meningitis),2.0,1,1.9190166765750023,0.9073254221368864,0.27280950267914045,0.8181269982139063,Structural priority,A3
+Influenza,3.0,2,3.0,0.0,0.0,1.0,Stable low priority,A3
+COVID-19,4.0,3,4.0,0.0,0.0,1.0,Stable low priority,A3
+Respiratory Syncytial Virus (RSV),1.0,1,1.2621472122821145,0.8689263938589429,0.6749616756949574,0.550025549536695,Conditionally critical,A4
+Meningococcal Disease (Meningitis),2.0,1,1.8689263938589429,0.9062247739437378,0.3374808378474787,0.7750127747683475,Structural priority,A4
+Influenza,3.0,2,2.868926393858943,0.0,0.3374808378474787,0.7750127747683475,Stable low priority,A4
+COVID-19,4.0,3,4.0,0.0,0.0,1.0,Stable low priority,A4
+Meningococcal Disease (Meningitis),1.0,1,1.0,1.0,0.0,1.0,Structural priority,A5
+Influenza,2.0,2,2.0,0.0,0.0,1.0,Structural priority,A5
+Respiratory Syncytial Virus (RSV),3.0,3,3.0,0.0,0.0,1.0,Stable low priority,A5
+COVID-19,4.0,4,4.0,0.0,0.0,1.0,Stable low priority,A5
+Respiratory Syncytial Virus (RSV),1.0,1,1.4421916768256338,0.9062247739437378,0.7721238869082395,0.4852507420611737,Conditionally critical,A6
+Influenza,2.0,1,1.8636404787966836,0.8689263938589429,0.616370679431325,0.58908621371245,Conditionally critical,A6
+COVID-19,3.0,2,2.9563150566597973,0.08098332342499776,0.5512928272231378,0.6324714485179082,Latent risk,A6
+Meningococcal Disease (Meningitis),4.0,3,3.7378527877178858,0.0,0.6749616756949574,0.550025549536695,Latent risk,A6
+COVID-19,2.0,1,2.0,1.0,0.0,1.0,Structural priority,A7
+Influenza,2.0,1,2.0,1.0,0.0,1.0,Structural priority,A7
+Respiratory Syncytial Virus (RSV),2.0,1,2.0,1.0,0.0,1.0,Structural priority,A7
+Meningococcal Disease (Meningitis),4.0,2,4.0,0.0,0.0,1.0,Stable low priority,A7
+COVID-19,1.0,1,1.0,1.0,0.0,1.0,Structural priority,A8
+Influenza,2.0,2,2.0,0.0,0.0,1.0,Structural priority,A8
+Respiratory Syncytial Virus (RSV),3.0,3,3.0,0.0,0.0,1.0,Stable low priority,A8
+Meningococcal Disease (Meningitis),4.0,4,4.0,0.0,0.0,1.0,Stable low priority,A8

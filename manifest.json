@@ -1,0 +1,107 @@
+{
+  "generated_utc": "2026-10-31 17:44 UTC",
+  "code_commit": "cf5f0b3",
+  "overall_status": "Healthy",
+  "files": {
+    "CDC Epidemic Trends and Rt.parquet": {
+      "sha256": "7aa22a60890b573e0ba2d4cc84a220a3570b93ce2e7e3ae900d062ff56c4c610",
+      "bytes": 246053
+    },
+    "CDC Wastewater Data for SARS-Co.parquet": {
+      "sha256": "c62f6b71a332effbcb6373fc26100b86fe7045db5c33ccb1bea1cefb7442aa0e",
+      "bytes": 2563807
+    },
+    "NNDSS Weekly Data.parquet": {
+      "sha256": "346dc983587824009ee0fea10446d30f5e5dc103e5bc926b4243e062a470e093",
+      "bytes": 626591
+    },
+    "NSSP Emergency Department Visit.parquet": {
+      "sha256": "5fa9628335a0efa0c87e39f0cf1181238637327cb949dc4a2b98f5b764d47c9a",
+      "bytes": 152054
+    },
+    "Percent of Tests Positive for V.parquet": {
+      "sha256": "5e6265fe655ec83b94815ae27c93414a435accbecc0248c5c13829493dbf34ab",
+      "bytes": 5598
+    },
+    "RESP-NET Rates and Clinical Dat.parquet": {
+      "sha256": "fc8d13956494e8dfa0e848dc51368bb73408cc9d6824aa6027a88ff71e86991a",
+      "bytes": 101940
+    },
+    "Weekly Hospital Respiratory Dat.parquet": {
+      "sha256": "86e5dfbb2596974644bd7120a80b162229471a8d0aa0720d0f86d4ff5f5f232f",
+      "bytes": 9373697
+    },
+    "derived/Admission.csv": {
+      "sha256": "9b02830c7b201a259992ed612c014d002f526e50fb0d5078fc52c6a3806a1791",
+      "bytes": 3478
+    },
+    "derived/Emphasis.csv": {
+      "sha256": "5d6a7dfee3c04c931bdd226e18f9f1cddb1f90992a7cec61373eed2bb92226f3",
+      "bytes": 10080
+    },
+    "derived/Feeds.csv": {
+      "sha256": "736074cca9a326b2c7d727f3786748c0b4e04cd0e1d0bab045454938f32c7327",
+      "bytes": 461
+    },
+    "derived/Final_Baseline.csv": {
+      "sha256": "e8561df6a76f37fe3365d9cd996afc0f362680698bc9da4f5deea1492ce73785",
+      "bytes": 351
+    },
+    "derived/Final_Expected.csv": {
+      "sha256": "904ccdfb07ec1f812d2fae058dd3f0bfc53475929c769304cfacb8f3a0090cce",
+      "bytes": 351
+    },
+    "derived/Historical_Stats.csv": {
+      "sha256": "ee0d9bdfbc4fbc7c905f6e1578410c853d39af3d487124bf6ee91e352cda4bf9",
+      "bytes": 952
+    },
+    "derived/Iterations.csv": {
+      "sha256": "b079516ebc904e76e716b6f9b5c47eec10bcaea5e516d8e72e19c58ea11e1c56",
+      "bytes": 101634
+    },
+    "derived/Limit_Overrides.csv": {
+      "sha256": "ecf9cbbdde5117a14d23d5a423f4b94c6cfb57d7ee8ac8c34a22d02c9148e172",
+      "bytes": 1621
+    },
+    "derived/Manifest.csv": {
+      "sha256": "1a47db13f48f74e5849e081b6df9e729d02f5029695b7c314d0db211e4a872ed",
+      "bytes": 162
+    },
+    "derived/Probabilities.csv": {
+      "sha256": "9705f1fb539ed0b2f01936e0a976171248be23f351f7fa5d9b19178d69e7d996",
+      "bytes": 2154
+    },
+    "derived/Profiles.csv": {
+      "sha256": "e0f31015cf77288ddeca329c03315378b43cd31fe4cf1e53dbbc29606e4dc020",
+      "bytes": 9031
+    },
+    "derived/Second_Order_Baseline.csv": {
+      "sha256": "579e2e44ee7a4da84d413a0793d1322c54101a12fbda15ec5ca3b6b1716453d1",
+      "bytes": 288
+    },
+    "derived/Second_Order_Expected.csv": {
+      "sha256": "3e1e29e38dfc1f18c5442bae414fb697fe6354c77b2372c950bfc76b83b06fff",
+      "bytes": 523
+    },
+    "derived/Settings.csv": {
+      "sha256": "1c57777d153023d3c0bce438ffe1bc34aa3f988bf443c980ff2b81c47b5084d6",
+      "bytes": 422
+    },
+    "derived/Stability.csv": {
+      "sha256": "eda0cb16c4334bd2d65fca11b728363631d7d870c448eae72640338a339a71ad",
+      "bytes": 2608
+    },
+    "derived/Stratifications.csv": {
+      "sha256": "87d15e394157994c412c2ffcc6365828c8208b56831dd9671678f3b5b3ec1682",
+      "bytes": 42514
+    },
+    "derived/Typology.csv": {
+      "sha256": "df11ef0d09c314a16e99e62c9bd4b40a0f51b0574f477b317a25d5a03a28741e",
+      "bytes": 3142
+    },
+    "derived/update_log.csv": {
+      "sha256": "0693adb38efdce89664193edd151bc41257dec119a488e62fd9d2dd240b88c41",
+      "bytes": 2158
+    }
+  }
+}

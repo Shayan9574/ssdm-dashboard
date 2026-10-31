@@ -1,0 +1,100 @@
+{
+  "last_sync_timestamp": "2026-10-31 17:44 UTC",
+  "overall_status": "Healthy",
+  "total_records": 215587,
+  "feeds": {
+    "Weekly Hospital Respiratory Data": {
+      "sheet": "Weekly Hospital Respiratory Dat",
+      "dataset_id": "ua7e-t2fy",
+      "network": "CDC NHSN",
+      "status": "Healthy",
+      "records": 21775,
+      "metrics": "Hospital admissions per 100k, ICU share, occupancy",
+      "error": null
+    },
+    "Emergency Department Visits": {
+      "sheet": "NSSP Emergency Department Visit",
+      "dataset_id": "rdmq-nq56",
+      "network": "CDC NSSP",
+      "status": "Healthy",
+      "records": 11076,
+      "metrics": "ED syndromic visit share (%)",
+      "error": null
+    },
+    "Viral Test Positivity": {
+      "sheet": "Percent of Tests Positive for V",
+      "dataset_id": "seuz-s2cv",
+      "network": "CDC NREVSS",
+      "status": "Healthy",
+      "records": 639,
+      "metrics": "PCR test positivity (%), national",
+      "error": null
+    },
+    "SARS-CoV-2 Wastewater": {
+      "sheet": "CDC Wastewater Data for SARS-Co",
+      "dataset_id": "j9g8-acpt",
+      "network": "CDC NWSS",
+      "status": "Healthy",
+      "records": 21355,
+      "metrics": "Sewershed concentration (copies/L), Michigan sewersheds",
+      "error": null
+    },
+    "Epidemic Trends and Rt": {
+      "sheet": "CDC Epidemic Trends and Rt",
+      "dataset_id": "5dqz-y4ea",
+      "network": "CDC CFA",
+      "status": "Healthy",
+      "records": 19834,
+      "metrics": "Effective reproduction number, growth probability",
+      "error": null
+    },
+    "RESP-NET Hospitalization Rates": {
+      "sheet": "RESP-NET Rates and Clinical Dat",
+      "dataset_id": "kvib-3txy",
+      "network": "CDC RESP-NET",
+      "status": "Healthy",
+      "records": 53058,
+      "metrics": "Weekly hospitalization rates per 100k by age",
+      "error": null
+    },
+    "Weekly Notifiable Diseases (NNDSS)": {
+      "sheet": "NNDSS Weekly Data",
+      "dataset_id": "x9gk-5huc",
+      "network": "CDC NNDSS",
+      "status": "Healthy",
+      "records": 87850,
+      "metrics": "Meningococcal cases",
+      "error": null
+    }
+  },
+  "files": {
+    "CDC Epidemic Trends and Rt.parquet": {
+      "sha256": "7aa22a60890b573e0ba2d4cc84a220a3570b93ce2e7e3ae900d062ff56c4c610",
+      "bytes": 246053
+    },
+    "CDC Wastewater Data for SARS-Co.parquet": {
+      "sha256": "c62f6b71a332effbcb6373fc26100b86fe7045db5c33ccb1bea1cefb7442aa0e",
+      "bytes": 2563807
+    },
+    "NNDSS Weekly Data.parquet": {
+      "sha256": "346dc983587824009ee0fea10446d30f5e5dc103e5bc926b4243e062a470e093",
+      "bytes": 626591
+    },
+    "NSSP Emergency Department Visit.parquet": {
+      "sha256": "5fa9628335a0efa0c87e39f0cf1181238637327cb949dc4a2b98f5b764d47c9a",
+      "bytes": 152054
+    },
+    "Percent of Tests Positive for V.parquet": {
+      "sha256": "5e6265fe655ec83b94815ae27c93414a435accbecc0248c5c13829493dbf34ab",
+      "bytes": 5598
+    },
+    "RESP-NET Rates and Clinical Dat.parquet": {
+      "sha256": "fc8d13956494e8dfa0e848dc51368bb73408cc9d6824aa6027a88ff71e86991a",
+      "bytes": 101940
+    },
+    "Weekly Hospital Respiratory Dat.parquet": {
+      "sha256": "86e5dfbb2596974644bd7120a80b162229471a8d0aa0720d0f86d4ff5f5f232f",
+      "bytes": 9373697
+    }
+  }
+}

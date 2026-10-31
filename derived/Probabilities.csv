@@ -1,0 +1,11 @@
+Scenario ID,Name,weighted,n_s,Y_s,f_s,frequency source,v_s,v source,h_s,h source,pi_s,p_s
+S1,Dual winter respiratory wave (tripledemic),True,3.0,4.082135523613963,0.7349094567404427,computed from the weekly series,0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.11758551307847082,0.09267457786311363
+S2,Hospital surge and inpatient strain,True,4.0,6.228610540725531,0.6421978021978022,computed from the weekly series,0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.10275164835164834,0.08098332342499776
+S3,Off season COVID resurgence,True,4.0,5.2,0.7692307692307692,registry,0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.12307692307692306,0.09700261190537034
+S4,Acute outbreak velocity,True,5.0,1.7056810403832992,2.9313804173354736,computed from the weekly series,0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.4690208667736757,0.36965702406073414
+S5,"Pediatric surge, RSV led",True,3.0,3.9,0.7692307692307693,registry,0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.12307692307692307,0.09700261190537035
+S6,Geriatric severe season,True,6.0,8.068446269678303,0.7436375975568374,computed from the weekly series,0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.11898201560909397,0.09377522605626223
+S7,Invasive meningococcal activity surge,True,5.0,4.810403832991102,1.0394137734775186,computed from the weekly series,0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.16630620375640295,0.13107360614105715
+S8,Immune evasion or vaccine mismatch,True,1.0,10.0,0.1,registry (event catalog),0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.016,0.012610339547698147
+S9,Antimicrobial resistance advisory,True,2.0,10.0,0.2,registry (event catalog),0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),0.032,0.025220679095396294
+ST1,Economic and cost burden lens,False,0.0,0.0,,registry (event catalog),0.39999999999999997,default (Moderate),0.39999999999999997,default (Moderate),,

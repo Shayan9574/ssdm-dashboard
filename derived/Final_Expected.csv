@@ -1,0 +1,5 @@
+Overall Rank,Tier,Alternative,Weighted Distance S_i,Target of Tier,Margin to next tier,W_g provenance
+1.0,1,Respiratory Syncytial Virus (RSV),0.0,True,0.14507841234321206,default
+2.0,1,Influenza,0.4027,False,0.14507841234321206,default
+3.0,1,COVID-19,0.5804,False,0.14507841234321206,default
+4.0,2,Meningococcal Disease (Meningitis),0.0,True,,default

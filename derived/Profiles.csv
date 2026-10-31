@@ -1,0 +1,145 @@
+Agent,Disease,Criterion,Value
+A1,Influenza,Annual Incidence Rate (per 100k),14995.0
+A1,Influenza,Annual Hospitalization Rate (per 100k),208.8
+A1,Influenza,ICU Rate (% of Hosp),16.8
+A1,Influenza,Case-Fatality Ratio (%),0.088
+A1,Influenza,Current Weekly Hospitalization Rate (per 100k),1.47
+A1,Influenza,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",12.59
+A1,Influenza,Current ICU Share of Hospitalized (%),14.3
+A1,COVID-19,Annual Incidence Rate (per 100k),9798.0
+A1,COVID-19,Annual Hospitalization Rate (per 100k),261.0
+A1,COVID-19,ICU Rate (% of Hosp),18.4
+A1,COVID-19,Case-Fatality Ratio (%),0.305
+A1,COVID-19,Current Weekly Hospitalization Rate (per 100k),1.21
+A1,COVID-19,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",2.89
+A1,COVID-19,Current ICU Share of Hospitalized (%),13.53
+A1,Respiratory Syncytial Virus (RSV),Annual Incidence Rate (per 100k),1611.765
+A1,Respiratory Syncytial Virus (RSV),Annual Hospitalization Rate (per 100k),82.35
+A1,Respiratory Syncytial Virus (RSV),ICU Rate (% of Hosp),20.0
+A1,Respiratory Syncytial Virus (RSV),Case-Fatality Ratio (%),0.38999999999999996
+A1,Respiratory Syncytial Virus (RSV),Current Weekly Hospitalization Rate (per 100k),0.25
+A1,Respiratory Syncytial Virus (RSV),"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",2.44
+A1,Respiratory Syncytial Virus (RSV),Current ICU Share of Hospitalized (%),20.38
+A1,Meningococcal Disease (Meningitis),Annual Incidence Rate (per 100k),0.15
+A1,Meningococcal Disease (Meningitis),Annual Hospitalization Rate (per 100k),0.15
+A1,Meningococcal Disease (Meningitis),ICU Rate (% of Hosp),40.0
+A1,Meningococcal Disease (Meningitis),Case-Fatality Ratio (%),12.5
+A1,Meningococcal Disease (Meningitis),Current Weekly Hospitalization Rate (per 100k),
+A1,Meningococcal Disease (Meningitis),"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",
+A1,Meningococcal Disease (Meningitis),Current ICU Share of Hospitalized (%),
+A2,Influenza,Basic Reproduction Number (R0),1.25
+A2,Influenza,Test Positivity Rate (%),12.3
+A2,Influenza,Natural Infection Seroprevalence (%),
+A2,Influenza,Asymptomatic Transmission Rate (%),8.0
+A2,Influenza,Household Secondary Attack Rate (%),18.8
+A2,Influenza,Current Test Positivity (%),6.0
+A2,COVID-19,Basic Reproduction Number (R0),9.75
+A2,COVID-19,Test Positivity Rate (%),9.0
+A2,COVID-19,Natural Infection Seroprevalence (%),95.0
+A2,COVID-19,Asymptomatic Transmission Rate (%),32.4
+A2,COVID-19,Household Secondary Attack Rate (%),36.199999999999996
+A2,COVID-19,Current Test Positivity (%),3.8
+A2,Respiratory Syncytial Virus (RSV),Basic Reproduction Number (R0),3.0
+A2,Respiratory Syncytial Virus (RSV),Test Positivity Rate (%),4.8
+A2,Respiratory Syncytial Virus (RSV),Natural Infection Seroprevalence (%),83.8
+A2,Respiratory Syncytial Virus (RSV),Asymptomatic Transmission Rate (%),42.0
+A2,Respiratory Syncytial Virus (RSV),Household Secondary Attack Rate (%),10.0
+A2,Respiratory Syncytial Virus (RSV),Current Test Positivity (%),0.9
+A2,Meningococcal Disease (Meningitis),Basic Reproduction Number (R0),1.2999999999999998
+A2,Meningococcal Disease (Meningitis),Test Positivity Rate (%),
+A2,Meningococcal Disease (Meningitis),Natural Infection Seroprevalence (%),
+A2,Meningococcal Disease (Meningitis),Asymptomatic Transmission Rate (%),7.5
+A2,Meningococcal Disease (Meningitis),Household Secondary Attack Rate (%),3.5
+A2,Meningococcal Disease (Meningitis),Current Test Positivity (%),
+A3,Influenza,Average Length of Stay (Days),3.5
+A3,Influenza,Annual ED Visit Rate (per 100k),
+A3,Influenza,Current ED Visit Share (%),0.93
+A3,Influenza,Hospitalization Surge Velocity (%),41.34615384615384
+A3,COVID-19,Average Length of Stay (Days),3.4
+A3,COVID-19,Annual ED Visit Rate (per 100k),
+A3,COVID-19,Current ED Visit Share (%),0.45
+A3,COVID-19,Hospitalization Surge Velocity (%),-8.33333333333334
+A3,Respiratory Syncytial Virus (RSV),Average Length of Stay (Days),6.0
+A3,Respiratory Syncytial Virus (RSV),Annual ED Visit Rate (per 100k),750.2950000000001
+A3,Respiratory Syncytial Virus (RSV),Current ED Visit Share (%),0.08
+A3,Respiratory Syncytial Virus (RSV),Hospitalization Surge Velocity (%),56.25
+A3,Meningococcal Disease (Meningitis),Average Length of Stay (Days),14.0
+A3,Meningococcal Disease (Meningitis),Annual ED Visit Rate (per 100k),0.18
+A3,Meningococcal Disease (Meningitis),Current ED Visit Share (%),
+A3,Meningococcal Disease (Meningitis),Hospitalization Surge Velocity (%),
+A4,Influenza,Avg Days from Onset to Severe,3.5
+A4,Influenza,Effective Treatment Window (Days),2.0
+A4,Influenza,Standard Treatment Available,1.0
+A4,Influenza,Antimicrobial Resistance Prev (%),0.10000000000000002
+A4,Influenza,Severe Complication Rate (%),
+A4,COVID-19,Avg Days from Onset to Severe,8.0
+A4,COVID-19,Effective Treatment Window (Days),6.0
+A4,COVID-19,Standard Treatment Available,1.0
+A4,COVID-19,Antimicrobial Resistance Prev (%),13.0
+A4,COVID-19,Severe Complication Rate (%),16.2
+A4,Respiratory Syncytial Virus (RSV),Avg Days from Onset to Severe,4.0
+A4,Respiratory Syncytial Virus (RSV),Effective Treatment Window (Days),10.5
+A4,Respiratory Syncytial Virus (RSV),Standard Treatment Available,0.0
+A4,Respiratory Syncytial Virus (RSV),Antimicrobial Resistance Prev (%),0.5
+A4,Respiratory Syncytial Virus (RSV),Severe Complication Rate (%),47.9
+A4,Meningococcal Disease (Meningitis),Avg Days from Onset to Severe,1.5
+A4,Meningococcal Disease (Meningitis),Effective Treatment Window (Days),0.5
+A4,Meningococcal Disease (Meningitis),Standard Treatment Available,1.0
+A4,Meningococcal Disease (Meningitis),Antimicrobial Resistance Prev (%),0.5
+A4,Meningococcal Disease (Meningitis),Severe Complication Rate (%),20.0
+A5,Influenza,Vaccine Available,1.0
+A5,Influenza,Vaccine Effectiveness (%),59.5
+A5,Influenza,National Vaccine Coverage (%),47.0
+A5,Influenza,NPI Reduction (%),60.0
+A5,Influenza,Target Demographic Uptake (%),41.9
+A5,COVID-19,Vaccine Available,1.0
+A5,COVID-19,Vaccine Effectiveness (%),38.5
+A5,COVID-19,National Vaccine Coverage (%),22.5
+A5,COVID-19,NPI Reduction (%),0.0
+A5,COVID-19,Target Demographic Uptake (%),22.3
+A5,Respiratory Syncytial Virus (RSV),Vaccine Available,1.0
+A5,Respiratory Syncytial Virus (RSV),Vaccine Effectiveness (%),80.0
+A5,Respiratory Syncytial Virus (RSV),National Vaccine Coverage (%),39.9
+A5,Respiratory Syncytial Virus (RSV),NPI Reduction (%),35.5
+A5,Respiratory Syncytial Virus (RSV),Target Demographic Uptake (%),39.9
+A5,Meningococcal Disease (Meningitis),Vaccine Available,1.0
+A5,Meningococcal Disease (Meningitis),Vaccine Effectiveness (%),78.5
+A5,Meningococcal Disease (Meningitis),National Vaccine Coverage (%),90.1
+A5,Meningococcal Disease (Meningitis),NPI Reduction (%),
+A5,Meningococcal Disease (Meningitis),Target Demographic Uptake (%),90.1
+A6,Influenza,Pediatric Hosp Rate (<5),102.5
+A6,Influenza,Geriatric Hosp Rate (65+),598.8
+A6,Influenza,Racial Disparity Ratio,2.24
+A6,Influenza,Current Pediatric Hospitalization Rate <5 (per 100k),1.6
+A6,Influenza,Current Geriatric Hospitalization Rate 75+ (per 100k),6.65
+A6,COVID-19,Pediatric Hosp Rate (<5),109.5
+A6,COVID-19,Geriatric Hosp Rate (65+),537.6
+A6,COVID-19,Racial Disparity Ratio,1.9
+A6,COVID-19,Current Pediatric Hospitalization Rate <5 (per 100k),1.11
+A6,COVID-19,Current Geriatric Hospitalization Rate 75+ (per 100k),7.4
+A6,Respiratory Syncytial Virus (RSV),Pediatric Hosp Rate (<5),1116.7
+A6,Respiratory Syncytial Virus (RSV),Geriatric Hosp Rate (65+),426.9
+A6,Respiratory Syncytial Virus (RSV),Racial Disparity Ratio,7.96
+A6,Respiratory Syncytial Virus (RSV),Current Pediatric Hospitalization Rate <5 (per 100k),2.46
+A6,Respiratory Syncytial Virus (RSV),Current Geriatric Hospitalization Rate 75+ (per 100k),0.51
+A6,Meningococcal Disease (Meningitis),Pediatric Hosp Rate (<5),0.22
+A6,Meningococcal Disease (Meningitis),Geriatric Hosp Rate (65+),0.1
+A6,Meningococcal Disease (Meningitis),Racial Disparity Ratio,3.44
+A6,Meningococcal Disease (Meningitis),Current Pediatric Hospitalization Rate <5 (per 100k),
+A6,Meningococcal Disease (Meningitis),Current Geriatric Hospitalization Rate 75+ (per 100k),
+A7,Influenza,Geographic Spread Risk (Score),3.0
+A7,Influenza,Effective Reproduction Number (Rt),
+A7,Influenza,Probability of Outbreak Growth,
+A7,COVID-19,Geographic Spread Risk (Score),3.0
+A7,COVID-19,Effective Reproduction Number (Rt),
+A7,COVID-19,Probability of Outbreak Growth,
+A7,Respiratory Syncytial Virus (RSV),Geographic Spread Risk (Score),3.0
+A7,Respiratory Syncytial Virus (RSV),Effective Reproduction Number (Rt),
+A7,Respiratory Syncytial Virus (RSV),Probability of Outbreak Growth,
+A7,Meningococcal Disease (Meningitis),Geographic Spread Risk (Score),1.0
+A7,Meningococcal Disease (Meningitis),Effective Reproduction Number (Rt),
+A7,Meningococcal Disease (Meningitis),Probability of Outbreak Growth,
+A8,Influenza,Estimated Annual Direct Medical Cost ($B),16.0
+A8,COVID-19,Estimated Annual Direct Medical Cost ($B),37.3
+A8,Respiratory Syncytial Virus (RSV),Estimated Annual Direct Medical Cost ($B),15.2
+A8,Meningococcal Disease (Meningitis),Estimated Annual Direct Medical Cost ($B),0.076

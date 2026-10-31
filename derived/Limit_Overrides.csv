@@ -1,0 +1,26 @@
+Scenario,Agent,Criterion,Limit
+S1,A1,Current Weekly Hospitalization Rate (per 100k),4.7299999999999995
+S1,A1,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",16.46
+S1,A1,Current ICU Share of Hospitalized (%),20.735
+S1,A2,Current Test Positivity (%),13.010000000000002
+S1,A3,Current ED Visit Share (%),2.31
+S1,A3,Hospitalization Surge Velocity (%),52.95103957075789
+S1,A6,Current Pediatric Hospitalization Rate <5 (per 100k),8.856000000000012
+S1,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),19.529000000000003
+S2,A1,Current Weekly Hospitalization Rate (per 100k),4.7299999999999995
+S2,A1,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",16.46
+S2,A1,Current ICU Share of Hospitalized (%),20.735
+S2,A3,Hospitalization Surge Velocity (%),52.95103957075789
+S2,A6,Current Pediatric Hospitalization Rate <5 (per 100k),8.856000000000012
+S2,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),19.529000000000003
+S3,A2,Current Test Positivity (%),13.010000000000002
+S3,A7,Effective Reproduction Number (Rt),1.0
+S4,A3,Hospitalization Surge Velocity (%),52.95103957075789
+S4,A7,Effective Reproduction Number (Rt),1.0
+S5,A1,Current Weekly Hospitalization Rate (per 100k),4.7299999999999995
+S5,A1,"Peak Weekly Hospitalization Rate, 52 Weeks (per 100k)",16.46
+S5,A1,Current ICU Share of Hospitalized (%),20.735
+S5,A3,Hospitalization Surge Velocity (%),52.95103957075789
+S5,A6,Current Pediatric Hospitalization Rate <5 (per 100k),8.856000000000012
+S5,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),19.529000000000003
+S6,A6,Current Geriatric Hospitalization Rate 75+ (per 100k),19.529000000000003

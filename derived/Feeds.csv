@@ -1,0 +1,8 @@
+Feed,Source,Records,Latest observation
+Weekly Hospital Respiratory Dat,local parquet,21775,2026-10-24
+NSSP Emergency Department Visit,local parquet,11076,2026-10-24
+Percent of Tests Positive for V,local parquet,639,2026-10-24
+CDC Wastewater Data for SARS-Co,local parquet,21355,2026-10-26
+CDC Epidemic Trends and Rt,local parquet,19834,2026-10-27
+RESP-NET Rates and Clinical Dat,local parquet,53058,2026-10-24
+NNDSS Weekly Data,local parquet,87850,2026 week 42
